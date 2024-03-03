@@ -1,0 +1,29 @@
+---
+title: "ecosphere_cleaning"
+output: html_document
+date: "2024-03-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown *Jodie*
+
+## Load the Data 
+```{r}
+ecosphere <- read_csv("Ecosphere/ecosphere.csv") %>% clean_names()
+ecosphere
+```
+
+```{r}
+names(ecosphere)
+```
+```{r}
+miss_var_summary(ecosphere)
+```
+
+```{r}
+glimpse(ecosphere)
+```
+We have a combination of both numeric and cateorigal data! 

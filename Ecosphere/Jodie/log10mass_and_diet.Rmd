@@ -2,7 +2,7 @@
 title: "Log10Mass_and_Diet"
 output: 
   html_document: 
-    keep_md: true
+    keep_md: yes
 date: "2024-03-07"
 ---
 

@@ -1,0 +1,29 @@
+---
+title: "ecosphere_app"
+output: 
+  html_document: 
+    keep_md: yes
+date: "2024-03-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Load the Libraries
+```{r}
+library("tidyverse")
+library("janitor")
+library("naniar")
+library("RColorBrewer")
+```
+
+## Load the Data
+```{r}
+ecosphere <- read_csv("ecosphere.csv") %>% clean_names() 
+```
+## About our App 
+In our app, users will be able to select a habitat location and species to learn more about that species's life history events. The life history events available for users to learn about per species and habitat include: 
+
+Migration/range size, urban tolerance, population size, life expectancy, reproduction rates, log10mass, and diet. 

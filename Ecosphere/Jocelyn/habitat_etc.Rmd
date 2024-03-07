@@ -1,0 +1,69 @@
+---
+title: "Habitat etc."
+author: "Jocelyn Morales"
+date: "2024-03-07"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Libraries 
+```{r}
+library(tidyverse)
+library(janitor)
+library(naniar)
+```
+
+
+```{r}
+getwd()
+```
+
+# Load data
+```{r}
+ecosphere <- read.csv("ecosphere.csv") %>% clean_names()
+```
+
+```{r}
+miss_var_summary(ecosphere)
+```
+
+```{r}
+names(ecosphere)
+options(scipen=999)
+```
+```{r}
+ecosphere %>% 
+  replace_with_na(replace = list(habitat= " "))
+```
+
+# Filter out Habitat
+```{r}
+ecosphere %>% 
+  count(habitat)
+```
+
+#Habitat
+```{r}
+ecosphere %>%
+   filter(habitat != ".") %>% 
+  count(habitat) %>% 
+  ggplot(aes(x=habitat, y=n))+
+  geom_col()+
+  labs(title = "")
+```
+
+# Migrator Strategy 
+```{r}
+ecosphere %>% 
+  ggplot(aes(x=urban_affiliate, y=winter_range_area, fill = migratory_strategy))+
+  geom_col(position = "dodge")+
+  facet_grid(~habitat)+
+  theme(axis.text.x = element_text(angle = , hjust = 1))
+```
+
+

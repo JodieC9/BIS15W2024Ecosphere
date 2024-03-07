@@ -25,10 +25,10 @@ library("tidyverse")
 
 ```
 ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ dplyr     1.1.4     ✔ readr     2.1.4
 ## ✔ forcats   1.0.0     ✔ stringr   1.5.1
-## ✔ ggplot2   3.5.0     ✔ tibble    3.2.1
-## ✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+## ✔ ggplot2   3.4.4     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.3     ✔ tidyr     1.3.0
 ## ✔ purrr     1.0.2     
 ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 ## ✖ dplyr::filter() masks stats::filter()
@@ -154,7 +154,7 @@ miss_var_summary(ecosphere)
 ```
 ## # A tibble: 21 × 3
 ##    variable           n_miss pct_miss
-##    <chr>               <int>    <num>
+##    <chr>               <int>    <dbl>
 ##  1 population_size       273    49.5 
 ##  2 habitat                14     2.54
 ##  3 order                   0     0   
@@ -272,14 +272,27 @@ table(ecosphere$diet)
 
 
 ```r
-ecosphere %>% 
-  ggplot(aes(x=diet, fill=diet))+
-  geom_bar(color="black", alpha=0.75)+
-  scale_fill_brewer(palette ="PuBuGn")+
-  theme_classic()+
-  labs(title="Diet Composition in Recorded Winter Birds",
-       x= "Type of Diet",
-       y="Number of Individuals")
+# Assuming 'ecosphere' is your dataset and 'diet' is a column representing the type of diet
+
+ecosphere %>%
+  ggplot(aes(x = diet, fill = diet)) +
+  geom_bar(color = "black", alpha = 0.75) +
+  geom_text(stat = "count", aes(label = ..count..), vjust = -0.5) +  # Add text labels
+  scale_fill_brewer(palette = "PuBuGn") +
+  theme_classic() +
+  labs(
+    title = "Diet Composition in Recorded Winter Birds",
+    x = "Type of Diet",
+    y = "Number of Individuals"
+  )
+```
+
+```
+## Warning: The dot-dot notation (`..count..`) was deprecated in ggplot2 3.4.0.
+## ℹ Please use `after_stat(count)` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
 ```
 
 ![](log10mass_and_diet_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
@@ -292,18 +305,19 @@ In the article, authors make note that bird species that are most prone to extin
 
 ```r
 ecosphere %>% 
+  filter(family %in% c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae", "Accipitridae", "Icteridae", "Laridae", "Corvidae")) %>% 
   ggplot(aes(x=diet,y=log10_mass,fill=diet))+
   geom_boxplot(color="black", alpha=0.75)+
   scale_fill_brewer(palette ="PuBuGn")+ #why is color not working
   theme(axis.text.x = element_text(angle = 60, hjust=1))+
   labs(title="Diet Composition and Bird Weight",
-       x= "Diet Composition",
+       x= "Type of Diet",
        y="Bird Weight")
 ```
 
 ![](log10mass_and_diet_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
 
-This graph makes it clear that winter birds who rely on nectar as a food source, have significantly smaller weights. While this does not mean this winter bird is doing poor, it demonstrates a difference in survival tactics depending on the diet. In the context of climate change, flowering plants are expected to do poor in habitats with rising temperatures. While more flowers are found to bloom with warmer temperatures, the amount of nectar found is not increasing proportionally. Thus suggesting a decrease in food, which is bound to have negative impacts for winter birds that depend on nectar for survival. From this fact, nectar dependent birds will be excluded from being bird species less vulnerable to extinction. 
+This graph makes it clear that winter birds who rely on nectar as a food source, have significantly smaller weights. While this does not mean this winter bird is doing poor, it demonstrates a difference in survival tactics depending on the diet. In the context of climate change, flowering plants are expected to do poor in habitats with rising temperatures. While more flowers are found to bloom with warmer temperatures, the amount of nectar found is not increasing proportionally. Thus suggesting a decrease in food, which is bound to have negative impacts for winter birds that depend on nectar for survival. From this fact, nectar dependent birds will be excluded from being bird species `less` vulnerable to extinction on the basis of weight.
 
 Determining average weight per diet. Mass is assumed to be recorded in grams, note that weight is measured in log10 scale. 
 
@@ -327,17 +341,20 @@ ecosphere %>%
 ```
 
 ```r
-ecosphere %>% 
-  group_by(diet) %>% 
-  summarise(mean_weight=mean(log10_mass)) %>% 
-  ggplot(aes(x=diet,y=mean_weight,fill=diet))+
-  geom_col(color="black", alpha=0.75)+
-  scale_fill_brewer(palette ="PuBuGn")+ #why is color not working
-  theme(axis.text.x = element_text(angle = 60, hjust=1))+
-  labs(title="Diet Composition and Mean Bird Weight",
-       x= "Diet Composition",
-       y="Mean Bird Weight")+
-  geom_text(aes(label = mean_weight), vjust = -0.2, size = 3, color = "black") #How do I round these numbers to only go 2 sig figs?
+ecosphere %>%
+  filter(family %in% c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae", "Accipitridae", "Icteridae", "Laridae", "Corvidae")) %>% 
+  group_by(diet) %>%
+  summarise(mean_weight = mean(log10_mass)) %>%
+  ggplot(aes(x = diet, y = mean_weight, fill = diet)) +
+  geom_col(color = "black", alpha = 0.75) +
+  scale_fill_brewer(palette = "PuBuGn") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  labs(
+    title = "Diet Composition and Mean Bird Weight",
+    x = "Diet Composition",
+    y = "Mean Bird Weight"
+  ) +
+  geom_text(aes(label = round(mean_weight, 2)), vjust = -0.2, size = 3, color = "black")
 ```
 
 ![](log10mass_and_diet_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
@@ -348,7 +365,7 @@ ecosphere %>%
 ecosphere %>% 
   filter(habitat!= "NA") %>% 
   ggplot(aes(x=diet,y=log10_mass,fill=diet))+
-  geom_col(position="dodge", color="black", alpha=0.75)+
+  geom_boxplot(position="dodge", color="black", alpha=0.75)+
   scale_fill_brewer(palette ="PuBuGn")+
   theme(axis.text.x = element_text(angle = 60, hjust=1))+
   labs(title="Diet Composition and Bird Weight",

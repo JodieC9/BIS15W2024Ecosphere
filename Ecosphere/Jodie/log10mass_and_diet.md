@@ -10,9 +10,11 @@ date: "2024-03-07"
 
 ## R Markdown
 
-##Background and Analysis Goals For our project, we are interested in analyzing the life history traits of the winter birds in the "Population trends for North American winter birds based on hierarchical models".We seek to determine which combination of life history variables results in the lowest extinction risk of winter birds.
+##Background and Analysis Goals 
 
-In this rmd file, we will specifically look at `Log10mass` and `Diet` from the `ecosphere` data.
+For our project, we are interested in analyzing the life history traits of the winter birds in the "Population trends for North American winter birds based on hierarchical models". We seek to determine which combination of life history variables results in the lowest extinction risk of winter birds in the context of increasing concern with climate change. 
+
+In this rmd file, we will specifically look at `Log10mass` and `Diet` from the `ecosphere` data. We seek to determine which family of birds has the lowest extinction risk only based on their survival ability from weight and diet composition. 
 
 ## Load the Libraries
 
@@ -224,7 +226,7 @@ summary(ecosphere)
 
 Through a combination of `miss_var_summary` and `summary` functions we can check there are no NA placeholders in the data. There does not seem to be unusual data values as indicated by the `summary` function. As such, we can assume all NA values are correclty accounted for with NA.
 
-## \_\_\_ the Data.
+## Weight and Diet Analysis
 
 
 ```r
@@ -252,7 +254,8 @@ ecosphere %>%
 ## # ℹ 64 more rows
 ```
 
-The Antidae and Emberizidae winter bird famiilies are the most abundant in `ecosphere`.
+The Antidae and Emberizidae winter bird families are the most abundant in `ecosphere`. High signs of abundance is a good thing, this will be considered later on. 
+
 
 
 ```r
@@ -283,6 +286,9 @@ ecosphere %>%
 
 We have a large abundance of Invertebrates in the data.
 
+*Relationship between bird weight and diet* 
+In the article, authors make note that bird species that are most prone to extinction events in the context of climate change are those larger in overall body weight. 
+
 
 ```r
 ecosphere %>% 
@@ -297,7 +303,45 @@ ecosphere %>%
 
 ![](log10mass_and_diet_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
 
-This graph makes it clear that winter birds who rely on nectar as a food source, have significantly smaller weights. While this does not mean this winter bird is doing poor, it demonstrates a difference in survival tactics depending on the diet.
+This graph makes it clear that winter birds who rely on nectar as a food source, have significantly smaller weights. While this does not mean this winter bird is doing poor, it demonstrates a difference in survival tactics depending on the diet. In the context of climate change, flowering plants are expected to do poor in habitats with rising temperatures. While more flowers are found to bloom with warmer temperatures, the amount of nectar found is not increasing proportionally. Thus suggesting a decrease in food, which is bound to have negative impacts for winter birds that depend on nectar for survival. From this fact, nectar dependent birds will be excluded from being bird species less vulnerable to extinction. 
+
+Determining average weight per diet. Mass is assumed to be recorded in grams, note that weight is measured in log10 scale. 
+
+```r
+ecosphere %>% 
+  group_by(diet) %>% 
+  summarise(mean_weight=mean(log10_mass))
+```
+
+```
+## # A tibble: 7 × 2
+##   diet          mean_weight
+##   <chr>               <dbl>
+## 1 Fruit               1.97 
+## 2 Invertebrates       1.73 
+## 3 Nectar              0.604
+## 4 Omnivore            1.89 
+## 5 Seed                1.64 
+## 6 Vegetation          3.04 
+## 7 Vertebrates         2.85
+```
+
+```r
+ecosphere %>% 
+  group_by(diet) %>% 
+  summarise(mean_weight=mean(log10_mass)) %>% 
+  ggplot(aes(x=diet,y=mean_weight,fill=diet))+
+  geom_col(color="black", alpha=0.75)+
+  scale_fill_brewer(palette ="PuBuGn")+ #why is color not working
+  theme(axis.text.x = element_text(angle = 60, hjust=1))+
+  labs(title="Diet Composition and Mean Bird Weight",
+       x= "Diet Composition",
+       y="Mean Bird Weight")+
+  geom_text(aes(label = mean_weight), vjust = -0.2, size = 3, color = "black") #How do I round these numbers to only go 2 sig figs?
+```
+
+![](log10mass_and_diet_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
+
 
 
 ```r
@@ -313,7 +357,7 @@ ecosphere %>%
   facet_wrap(~habitat)
 ```
 
-![](log10mass_and_diet_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
+![](log10mass_and_diet_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 
 From the prior graph, we learn that birds with the highest body weight are those reliant on vegation and invertebrates have the highest log10mass. 
 
@@ -329,7 +373,7 @@ ecosphere %>%
   facet_wrap(~diet)
 ```
 
-![](log10mass_and_diet_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
+![](log10mass_and_diet_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
 
 In the study, authors conclude that body size can influence the survival status of birds, with larger bodied taxa being at higher risk. In terms of diet, taxa that occupy higher tropic levels face elevated risk of extinction. 
 

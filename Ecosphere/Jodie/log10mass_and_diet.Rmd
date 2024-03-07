@@ -1,0 +1,134 @@
+---
+title: "Log10Mass_and_Diet"
+output: 
+  html_document: 
+    keep_md: true
+date: "2024-03-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+##Background and Analysis Goals For our project, we are interested in analyzing the life history traits of the winter birds in the "Population trends for North American winter birds based on hierarchical models".We seek to determine which combination of life history variables results in the lowest extinction risk of winter birds.
+
+In this rmd file, we will specifically look at `Log10mass` and `Diet` from the `ecosphere` data.
+
+## Load the Libraries
+
+```{r}
+library("tidyverse")
+library("janitor")
+library("naniar")
+library("RColorBrewer")
+```
+
+## Load the data
+
+```{r}
+ecosphere <- read_csv("Ecosphere/data/ecosphere.csv") %>% clean_names()
+```
+
+## Load the colors
+
+```{r}
+?RColorBrewer
+```
+
+```{r}
+colors <- brewer.pal(9,"PuBuGn")
+display.brewer.pal(9,"PuBuGn")
+```
+
+```{r}
+?RColorBrewer
+```
+
+## Understanding the Data Structure
+
+```{r}
+names(ecosphere)
+```
+
+```{r}
+glimpse(ecosphere)
+```
+
+As shown above, we have a combination of categorical and continous data. This will allow us to perform a variety of analysis and representation of data on various graph types.
+
+```{r}
+miss_var_summary(ecosphere)
+```
+
+```{r}
+summary(ecosphere)
+```
+
+Through a combination of `miss_var_summary` and `summary` functions we can check there are no NA placeholders in the data. There does not seem to be unusual data values as indicated by the `summary` function. As such, we can assume all NA values are correclty accounted for with NA.
+
+## \_\_\_ the Data.
+
+```{r}
+ecosphere %>% 
+  select(order, family, common_name, diet, log10_mass) %>% 
+  group_by(family) %>% 
+  summarise(individuals_per_family=n()) %>% 
+  arrange(desc(individuals_per_family))
+```
+
+The Antidae and Emberizidae winter bird famiilies are the most abundant in `ecosphere`.
+
+```{r}
+table(ecosphere$diet)
+```
+
+```{r}
+ecosphere %>% 
+  ggplot(aes(x=diet, fill=diet))+
+  geom_bar(color="black")+
+  scale_fill_brewer(palette ="PuBuGn")+
+  theme_classic()+
+  labs(title="Diet Composition in Recorded Winter Birds",
+       x= "Type of Diet",
+       y="Number of Individuals")
+```
+
+We have a large abundance of Invertebrates in the data.
+
+```{r}
+ecosphere %>% 
+  ggplot(aes(x=diet,y=log10_mass,fill=diet))+
+  geom_boxplot(color="black")+
+  scale_fill_brewer(palette ="PuBuGn")+ #why is color not working
+  theme(axis.text.x = element_text(angle = 60, hjust=1))+
+  labs(title="Diet Composition and Bird Weight",
+       x= "Diet Composition",
+       y="Bird Weight")
+```
+
+This graph makes it clear that winter birds who rely on nectar as a food source, have significantly smaller weights. While this does not mean this winter bird is doing poor, it demonstrates a difference in survival tactics depending on the diet.
+
+```{r}
+ecosphere %>% 
+  filter(habitat!= "NA") %>% 
+  ggplot(aes(x=diet,y=log10_mass,fill=diet))+
+  geom_col()+
+  scale_fill_brewer(palette ="PuBuGn")+
+  theme(axis.text.x = element_text(angle = 60, hjust=1))+
+  labs(title="Diet Composition and Bird Weight",
+       x= "Diet Composition",
+       y="Bird Weight")+
+  facet_wrap(~habitat)
+```
+
+From the prior graph, we learn that birds with the highest body weight are those reliant on
+
+```{r}
+ecosphere %>% 
+  select(order, family, common_name, diet, log10_mass) %>%
+  filter(diet== "Vegetation") %>% 
+  filter(diet== "Vertebrates") %>% 
+  ggplot(aes(x=))
+```

@@ -28,7 +28,7 @@ library("RColorBrewer")
 ## Load the data
 
 ```{r}
-ecosphere <- read_csv("Ecosphere/data/ecosphere.csv") %>% clean_names()
+ecosphere <- read_csv("ecosphere.csv") %>% clean_names()
 ```
 
 ## Load the colors
@@ -87,7 +87,7 @@ table(ecosphere$diet)
 ```{r}
 ecosphere %>% 
   ggplot(aes(x=diet, fill=diet))+
-  geom_bar(color="black")+
+  geom_bar(color="black", alpha=0.75)+
   scale_fill_brewer(palette ="PuBuGn")+
   theme_classic()+
   labs(title="Diet Composition in Recorded Winter Birds",
@@ -100,7 +100,7 @@ We have a large abundance of Invertebrates in the data.
 ```{r}
 ecosphere %>% 
   ggplot(aes(x=diet,y=log10_mass,fill=diet))+
-  geom_boxplot(color="black")+
+  geom_boxplot(color="black", alpha=0.75)+
   scale_fill_brewer(palette ="PuBuGn")+ #why is color not working
   theme(axis.text.x = element_text(angle = 60, hjust=1))+
   labs(title="Diet Composition and Bird Weight",
@@ -114,7 +114,7 @@ This graph makes it clear that winter birds who rely on nectar as a food source,
 ecosphere %>% 
   filter(habitat!= "NA") %>% 
   ggplot(aes(x=diet,y=log10_mass,fill=diet))+
-  geom_col()+
+  geom_col(position="dodge", color="black", alpha=0.75)+
   scale_fill_brewer(palette ="PuBuGn")+
   theme(axis.text.x = element_text(angle = 60, hjust=1))+
   labs(title="Diet Composition and Bird Weight",
@@ -123,12 +123,18 @@ ecosphere %>%
   facet_wrap(~habitat)
 ```
 
-From the prior graph, we learn that birds with the highest body weight are those reliant on
+From the prior graph, we learn that birds with the highest body weight are those reliant on vegation and invertebrates have the highest log10mass. 
 
 ```{r}
 ecosphere %>% 
   select(order, family, common_name, diet, log10_mass) %>%
-  filter(diet== "Vegetation") %>% 
-  filter(diet== "Vertebrates") %>% 
-  ggplot(aes(x=))
+  filter(diet== "Vegetation" | diet=="Vertebrates" | diet=="Nectar") %>% 
+  ggplot(aes(x=order,fill=diet))+
+  geom_bar(position="dodge",color="black", alpha=0.75)+
+  scale_fill_brewer(palette ="PuBuGn")+
+  theme(axis.text.x = element_text(angle = 60, hjust=1))+
+  facet_wrap(~diet)
 ```
+
+In the study, authors conclude that body size can influence the survival status of birds, with larger bodied taxa being at higher risk. In terms of diet, taxa that occupy higher tropic levels face elevated risk of extinction. 
+

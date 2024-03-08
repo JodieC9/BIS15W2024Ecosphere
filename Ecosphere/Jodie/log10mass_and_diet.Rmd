@@ -80,7 +80,50 @@ ecosphere %>%
   arrange(desc(individuals_per_family))
 ```
 
-The Antidae and Emberizidae winter bird families are the most abundant in `ecosphere`. High signs of abundance is a good thing, this will be considered later on. 
+As shown above, the top 10 most recorded observations of bird families. To simplify our analysis, given the extent of families listed in the data, we will only use these top 10 families of birds. 
+
+*Plot form of top 10 bird families*
+
+```{r}
+ecosphere %>% 
+  select(order, family, common_name, diet, log10_mass) %>% 
+  group_by(family) %>% 
+  summarise(individuals_per_family = n()) %>% 
+  arrange(desc(individuals_per_family)) %>%
+  top_n(10) %>%  # Filter top 10 most abundant families
+  ggplot(aes(x = reorder(family, individuals_per_family), y = individuals_per_family, fill=family)) +
+  geom_col(color = "black", alpha = 0.75) +
+  scale_fill_brewer(palette = "PuBuGn") +
+  theme() +
+  labs(
+    title = "Number of Individuals per Family (Top 10)",
+    x = "Family",
+    y = "Number of Individuals",
+    fill = "Family"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+```{r}
+library(ggplot2)
+
+selected_colors <- c("#e0f3db", "#a8ddb5", "#7bccc4", "#4eb3d3", "#2b8cbe")
+
+ecosphere %>%
+  select(family, diet) %>%
+  filter(family %in% c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae", "Accipitridae", "Icteridae", "Laridae", "Corvidae")) %>% 
+  ggplot(aes(x = family, fill = diet)) +
+  geom_bar(color="black", alpha=0.75) +
+  scale_fill_manual(values = selected_colors) +
+  theme() +
+  labs(
+    title = "Diet Composition of Top 10 Bird Families",
+    x = "Family",
+    y = "Number of Birds",
+    fill = "Diet"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
 
 
 ```{r}
@@ -88,19 +131,19 @@ table(ecosphere$diet)
 ```
 
 ```{r}
-# Assuming 'ecosphere' is your dataset and 'diet' is a column representing the type of diet
-
 ecosphere %>%
+  filter(family %in% c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae", "Accipitridae", "Icteridae", "Laridae", "Corvidae")) %>% 
   ggplot(aes(x = diet, fill = diet)) +
   geom_bar(color = "black", alpha = 0.75) +
   geom_text(stat = "count", aes(label = ..count..), vjust = -0.5) +  # Add text labels
   scale_fill_brewer(palette = "PuBuGn") +
-  theme_classic() +
+  theme() +
   labs(
-    title = "Diet Composition in Recorded Winter Birds",
+    title = "Diet Composition in Top 10 Recorded Winter Birds",
     x = "Type of Diet",
-    y = "Number of Individuals"
-  )
+    y = "Number of Individuals",
+    fill= "Diet"
+  ) 
 ```
 
 We have a large abundance of Invertebrates in the data.
@@ -117,7 +160,8 @@ ecosphere %>%
   theme(axis.text.x = element_text(angle = 60, hjust=1))+
   labs(title="Diet Composition and Bird Weight",
        x= "Type of Diet",
-       y="Bird Weight")
+       y="Bird Weight",
+       fill="Diet")
 ```
 
 This graph makes it clear that winter birds who rely on nectar as a food source, have significantly smaller weights. While this does not mean this winter bird is doing poor, it demonstrates a difference in survival tactics depending on the diet. In the context of climate change, flowering plants are expected to do poor in habitats with rising temperatures. While more flowers are found to bloom with warmer temperatures, the amount of nectar found is not increasing proportionally. Thus suggesting a decrease in food, which is bound to have negative impacts for winter birds that depend on nectar for survival. From this fact, nectar dependent birds will be excluded from being bird species `less` vulnerable to extinction on the basis of weight.
@@ -140,7 +184,8 @@ ecosphere %>%
   labs(
     title = "Diet Composition and Mean Bird Weight",
     x = "Diet Composition",
-    y = "Mean Bird Weight"
+    y = "Mean Bird Weight",
+    fill="Diet"
   ) +
   geom_text(aes(label = round(mean_weight, 2)), vjust = -0.2, size = 3, color = "black")
 
@@ -156,7 +201,8 @@ ecosphere %>%
   theme(axis.text.x = element_text(angle = 60, hjust=1))+
   labs(title="Diet Composition and Bird Weight",
        x= "Diet Composition",
-       y="Bird Weight")+
+       y="Bird Weight",
+       fill="Diet")+
   facet_wrap(~habitat)
 ```
 

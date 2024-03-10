@@ -153,7 +153,7 @@ top10_ecosphere %>%
 ```
 ## Creating the App 
 
-This is just a skeleton of an app based on some experimentation with ChatGPT with built in data. Once we figure out wht graphs we want to include, we just have to replace all the variable names
+This is just a skeleton of an app based on some experimentation with ChatGPT with built in data. Once we figure out what graphs we want to include, we just have to replace all the variable names
 
 ```{r}
 library(shiny)
@@ -162,21 +162,18 @@ library(ggplot2)
 
 # Define UI
 ui <- dashboardPage(
-  dashboardHeader(title = "Species Analysis"),
-  dashboardSidebar(
-    sidebarMenu(
-      menuItem("Species Analysis", tabName = "species_analysis", icon = icon("chart-line"))
-    )
-  ),
+  dashboardHeader(title = "Ecosphere"),
+  dashboardSidebar(),  # No sidebar defined
   dashboardBody(
+    titlePanel("Ecosphere Winter Birds: Species Analysis"),  # Set title for browser tab
     tabItems(
       tabItem(tabName = "species_analysis",
               h2("Species Analysis"),
               fluidRow(
                 box(title = "Select Habitat",
                     radioButtons("habitat", "Habitat:",
-                                 choices = unique(iris$Species),
-                                 selected = "setosa")
+                                 choices = unique(top10_ecosphere$habitat),
+                                 selected = unique(top10_ecosphere$habitat)[1])
                 ),
                 box(title = "Select Species",
                     selectInput("species", "Species:",
@@ -198,56 +195,55 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   observe({
     updateSelectInput(session, "species",
-                      choices = setdiff(unique(iris$Species), input$habitat))
+                      choices = setdiff(unique(top10_ecosphere$species), input$habitat))
   })
   
   selected_data <- reactive({
     if (!is.null(input$species)) {
-      iris[iris$Species == input$species, ]
+      top10_ecosphere[top10_ecosphere$species == input$species, ]
     } else {
-      iris[iris$Species == input$habitat, ]
+      top10_ecosphere[top10_ecosphere$habitat == input$habitat, ]
     }
   })
   
-  plot_type <- reactiveVal("sepal_vs_petal")
+  plot_type <- reactiveVal("population_vs_life_expectancy")
   
   output$selected_plot <- renderPlot({
     plot_func <- switch(plot_type(),
-                        "sepal_vs_petal" = {
-                          ggplot(selected_data(), aes(x = Sepal.Length, y = Petal.Length, color = Species)) +
+                        "population_vs_life_expectancy" = {
+                          ggplot(selected_data(), aes(x = population_size, y = life_expectancy, color = species)) +
                             geom_point() +
-                            labs(x = "Sepal Length", y = "Petal Length") +
-                            ggtitle("Sepal Length vs Petal Length")
+                            labs(x = "Population Size", y = "Life Expectancy") +
+                            ggtitle("Population Size vs Life Expectancy")
                         },
-                        "sepal_width_vs_petal_width" = {
-                          ggplot(selected_data(), aes(x = Sepal.Width, y = Petal.Width, color = Species)) +
+                        "population_vs_mass" = {
+                          ggplot(selected_data(), aes(x = population_size, y = log10_mass, color = species)) +
                             geom_point() +
-                            labs(x = "Sepal Width", y = "Petal Width") +
-                            ggtitle("Sepal Width vs Petal Width")
+                            labs(x = "Population Size", y = "Log10 Mass") +
+                            ggtitle("Population Size vs Log10 Mass")
                         },
-                        "sepal_length_vs_width" = {
-                          ggplot(selected_data(), aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+                        "life_expectancy_vs_mass" = {
+                          ggplot(selected_data(), aes(x = life_expectancy, y = log10_mass, color = species)) +
                             geom_point() +
-                            labs(x = "Sepal Length", y = "Sepal Width") +
-                            ggtitle("Sepal Length vs Sepal Width")
+                            labs(x = "Life Expectancy", y = "Log10 Mass") +
+                            ggtitle("Life Expectancy vs Log10 Mass")
                         })
     print(plot_func)
   })
   
   observeEvent(input$switch_button, {
-    if (plot_type() == "sepal_vs_petal") {
-      plot_type("sepal_width_vs_petal_width")
-    } else if (plot_type() == "sepal_width_vs_petal_width") {
-      plot_type("sepal_length_vs_width")
+    if (plot_type() == "population_vs_life_expectancy") {
+      plot_type("population_vs_mass")
+    } else if (plot_type() == "population_vs_mass") {
+      plot_type("life_expectancy_vs_mass")
     } else {
-      plot_type("sepal_vs_petal")
+      plot_type("population_vs_life_expectancy")
     }
   })
 }
 
 # Run the application
 shinyApp(ui = ui, server = server)
-
 
 ```
 

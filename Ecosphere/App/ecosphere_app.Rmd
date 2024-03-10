@@ -22,8 +22,232 @@ library("RColorBrewer")
 ## Load the Data
 ```{r}
 ecosphere <- read_csv("ecosphere.csv") %>% clean_names() 
+ecosphere
 ```
+
 ## About our App 
 In our app, users will be able to select a habitat location and species to learn more about that species's life history events. The life history events available for users to learn about per species and habitat include: 
 
 Migration/range size, urban tolerance, population size, life expectancy, reproduction rates, log10mass, and diet. 
+
+
+```{r}
+ecosphere <- ecosphere %>%
+  rename(species = scientific_name)
+#Changed the old variable name of "scientific_name" to "species" to make app building easier 
+```
+
+## Top 10 Most Abundant Families 
+All graphs are made using a sub-category of data with information ONLY about the 10 top most abundant families in the data. This is done to make the number of observations on the x-axis more manageable.
+
+```{r}
+ecosphere %>% 
+  select(order, family, common_name, diet, log10_mass) %>% 
+  group_by(family) %>% 
+  summarise(individuals_per_family = n()) %>% 
+  arrange(desc(individuals_per_family)) %>%
+  top_n(10) 
+
+top10_ecosphere
+```
+As such, the only families that will be included in the graphs shown in our app, are from the families listed above. 
+```{r}
+names(ecosphere)
+```
+
+
+```{r}
+top10_families <- c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", 
+                    "Tyrannidae", "Accipitridae", "Icteridae", "Laridae", "Corvidae")
+
+top10_ecosphere <- ecosphere %>%
+  select(order, diet, migratory_strategy, population_size, circles, upper_95_percent_ci, 
+         family, life_expectancy, log10_mass, winter_range_area, feeder_bird, common_name, 
+         habitat, mean_eggs_per_clutch, range_in_cbc, median_trend, species, urban_affiliate, 
+         mean_eggs_per_clutch, strata, lower_95_percent_ci) %>% 
+  filter(family %in% top10_families)
+
+top10_ecosphere
+```
+
+
+## Creating the graphs 
+Each graph will be specific to the family the user selects 
+
+*Panchia mentioned being able to select the habitat on the app, would need to check which families exist in different habitats 
+
+```{r}
+#Bird mass and diet 
+top10_ecosphere%>% 
+  ggplot(aes(x=diet,y=log10_mass,fill=diet))+
+  geom_boxplot(color="black", alpha=0.75)+
+  scale_fill_brewer(palette ="PuBuGn")+
+  theme(axis.text.x = element_text(angle = 60, hjust=1))+
+  labs(title="Diet Composition and Bird Weight",
+       x= "Type of Diet",
+       y="Bird Weight",
+       fill="Diet")+
+  facet_wrap(~family)
+```
+```{r}
+top10_ecosphere%>% 
+  ggplot(aes(x=diet,y=log10_mass,fill=diet))+
+  geom_boxplot(color="black", alpha=0.75)+
+  scale_fill_brewer(palette ="PuBuGn")+
+  theme(axis.text.x = element_text(angle = 60, hjust=1))+
+  labs(title="Diet Composition and Bird Weight",
+       x= "Type of Diet",
+       y="Bird Weight",
+       fill="Diet")
+```
+
+
+```{r}
+#Range Size and Migration 
+
+# Removing scientific notation
+custom_format <- function(x) {
+  format(x, scientific = FALSE)
+}
+
+top10_ecosphere %>% 
+  ggplot(aes(x = migratory_strategy, y = winter_range_area, fill=family)) +
+  geom_boxplot(color = "black", alpha = 0.75) +
+  scale_fill_brewer(palette = "PuBuGn") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  scale_y_continuous(labels = custom_format) +  # Apply custom formatting to y-axis
+  labs(title = "Winter Range Area by Migratory Strategy",
+       x = "Migratory Strategy",
+       y = "Winter Range Area")+
+  facet_wrap(~family)
+```
+
+
+```{r}
+#Population size and Life Expectancy 
+
+top10_ecosphere
+top10_ecosphere %>% 
+  ggplot(aes(y = population_size, x = life_expectancy, fill=family)) +
+  geom_col(color = "black", alpha = 0.75, position="dodge") +
+  scale_fill_brewer(palette = "PuBuGn") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  scale_y_continuous(labels = custom_format) +  # Apply custom formatting to y-axis
+  labs(title = "Population Size by Life Expectancy",
+       y = "Population Size",
+       x = "Life Expectancy")
+```
+
+
+```{r}
+#Population size and Reproduction (Egg Count)
+custom_format <- function(x) {
+  format(x, scientific = FALSE)
+}
+
+top10_ecosphere %>% 
+  ggplot(aes(x = population_size, y = mean_eggs_per_clutch, fill=family)) +
+  geom_point(color = "black", alpha = 0.75, position="dodge") +
+  scale_color_brewer(palette = "PuBuGn")+
+  coord_flip()
+```
+## Creating the App 
+
+This is just a skeleton of an app based on some experimentation with ChatGPT with built in data. Once we figure out wht graphs we want to include, we just have to replace all the variable names
+
+```{r}
+library(shiny)
+library(shinydashboard)
+library(ggplot2)
+
+# Define UI
+ui <- dashboardPage(
+  dashboardHeader(title = "Species Analysis"),
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Species Analysis", tabName = "species_analysis", icon = icon("chart-line"))
+    )
+  ),
+  dashboardBody(
+    tabItems(
+      tabItem(tabName = "species_analysis",
+              h2("Species Analysis"),
+              fluidRow(
+                box(title = "Select Habitat",
+                    radioButtons("habitat", "Habitat:",
+                                 choices = unique(iris$Species),
+                                 selected = "setosa")
+                ),
+                box(title = "Select Species",
+                    selectInput("species", "Species:",
+                                choices = NULL)
+                )
+              ),
+              fluidRow(
+                plotOutput("selected_plot")
+              ),
+              fluidRow(
+                actionButton("switch_button", "Switch Graph")
+              )
+      )
+    )
+  )
+)
+
+# Define server logic
+server <- function(input, output, session) {
+  observe({
+    updateSelectInput(session, "species",
+                      choices = setdiff(unique(iris$Species), input$habitat))
+  })
+  
+  selected_data <- reactive({
+    if (!is.null(input$species)) {
+      iris[iris$Species == input$species, ]
+    } else {
+      iris[iris$Species == input$habitat, ]
+    }
+  })
+  
+  plot_type <- reactiveVal("sepal_vs_petal")
+  
+  output$selected_plot <- renderPlot({
+    plot_func <- switch(plot_type(),
+                        "sepal_vs_petal" = {
+                          ggplot(selected_data(), aes(x = Sepal.Length, y = Petal.Length, color = Species)) +
+                            geom_point() +
+                            labs(x = "Sepal Length", y = "Petal Length") +
+                            ggtitle("Sepal Length vs Petal Length")
+                        },
+                        "sepal_width_vs_petal_width" = {
+                          ggplot(selected_data(), aes(x = Sepal.Width, y = Petal.Width, color = Species)) +
+                            geom_point() +
+                            labs(x = "Sepal Width", y = "Petal Width") +
+                            ggtitle("Sepal Width vs Petal Width")
+                        },
+                        "sepal_length_vs_width" = {
+                          ggplot(selected_data(), aes(x = Sepal.Length, y = Sepal.Width, color = Species)) +
+                            geom_point() +
+                            labs(x = "Sepal Length", y = "Sepal Width") +
+                            ggtitle("Sepal Length vs Sepal Width")
+                        })
+    print(plot_func)
+  })
+  
+  observeEvent(input$switch_button, {
+    if (plot_type() == "sepal_vs_petal") {
+      plot_type("sepal_width_vs_petal_width")
+    } else if (plot_type() == "sepal_width_vs_petal_width") {
+      plot_type("sepal_length_vs_width")
+    } else {
+      plot_type("sepal_vs_petal")
+    }
+  })
+}
+
+# Run the application
+shinyApp(ui = ui, server = server)
+
+
+```
+

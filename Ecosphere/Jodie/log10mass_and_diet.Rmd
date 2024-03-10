@@ -203,10 +203,45 @@ ecosphere %>%
        x= "Diet Composition",
        y="Bird Weight",
        fill="Diet")+
-  facet_wrap(~habitat)
+  facet_wrap(~)
 ```
 
 From the prior graph, we learn that birds with the highest body weight are those reliant on vegation and invertebrates have the highest log10mass. 
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Calculate abundance of each family
+family_abundance <- ecosphere %>%
+  group_by(family) %>%
+  summarize(abundance = n())
+
+# Select top 10 most abundant families
+top_10_families <- family_abundance %>%
+  arrange(desc(abundance)) %>%
+  slice_head(n = 10) %>%
+  pull(family)
+
+# Filter data to include only top 10 families
+top_10_data <- ecosphere %>%
+  filter(family %in% top_10_families)
+
+# Create facet wrapped plot
+ggplot(top_10_data, aes(x = diet, y = log10_mass)) +
+  geom_col() +
+    theme(axis.text.x = element_text(angle = 60, hjust=1))+
+  facet_wrap(~ family) +
+  labs(title = "Diet and log10 Mass by Top 10 Most Abundant Families",
+       x = "Diet",
+       y = "log10 Mass")
+
+```
+
+
+
+
+
 
 ```{r}
 ecosphere %>% 

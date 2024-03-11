@@ -4,9 +4,15 @@ author: "Pachia Lee"
 date: "`r Sys.Date()`"
 ---
 
+```{r}
+library("tidyverse")
+library("janitor")
+library("lubridate")
+```
+
 Loading data
 ```{r}
-ecosphere<- read_csv("ecosphere.csv") %>%  clean_names()
+ecosphere<- read_csv("ecosphere.csv") %>% clean_names()
 ```
 
 Structure of Data
@@ -25,16 +31,17 @@ ecosphere %>%
 ```
 
 ```{r}
-ecosphere_new<- ecosphere %>% 
+ecosphere_new<-ecosphere %>% 
   select(family, population_size, life_expectancy, mean_eggs_per_clutch, mean_age_at_sexual_maturity) %>% 
-  filter(population_size!="NA")
+  filter(population_size!="NA") %>% 
+  arrange(desc(population_size)) 
 ```
 
 ```{r}
-ecosphere_new %>% 
+top_10<-ecosphere_new %>% 
   count(family) %>% 
   arrange(desc(n)) %>% 
-  slice_head(n = 10)
+  slice_head(n=10)
 ```
 
 ```{r}
@@ -47,7 +54,7 @@ options(scipen = 999)
 
 
 ```{r}
-top_10_birds %>% 
+top_10%>% 
   ggplot(aes(x=family, y=n, fill=family))+
   geom_col(alpha=0.5)+
   coord_flip()+
@@ -61,16 +68,12 @@ top_10_birds %>%
 
 ##Create a plot that compares each family and their 
 ```{r}
-names(top_10_birds)
+names(ecosphere_new)
 ```
-
-
 
 ```{r}
 ecosphere_new %>% 
-  ggplot(aes(x=family, y=life_expectancy, fill=life_expectancy))+
-  geom_col()+
-  coord_flip()
+  
 ```
 
 

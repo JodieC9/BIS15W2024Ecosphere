@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ##Background and Analysis Goals 
 
-For our project, we are interested in analyzing the life history traits of the winter birds in the "Population trends for North American winter birds based on hierarchical models". We seek to determine which combination of life history variables results in the lowest extinction risk of winter birds in the context of increasing concern with climate change. 
+For our project, we are interested in analyzing the life history traits of the winter birds in the "Population trends for North American winter birds based on hierarchical models". We seek to determine which combination of life history variables results in the lowest extinction risk of winter birds in the context of increasing concern with climate change. As specified in the README file, we will only be focusing on the filter "Emberizidae" bird family.
 
 In this rmd file, we will specifically look at `Log10mass` and `Diet` from the `ecosphere` data. We seek to determine which family of birds has the lowest extinction risk only based on their survival ability from weight and diet composition. 
 
@@ -103,6 +103,7 @@ ecosphere %>%
   ) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+Filtering to just look at data pertaining to the Emberizidae family. 
 ```{r}
 library(ggplot2)
 
@@ -110,13 +111,13 @@ selected_colors <- c("#e0f3db", "#a8ddb5", "#7bccc4", "#4eb3d3", "#2b8cbe")
 
 ecosphere %>%
   select(family, diet) %>%
-  filter(family %in% c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae", "Accipitridae", "Icteridae", "Laridae", "Corvidae")) %>% 
+  filter(family == "Emberizidae") %>% 
   ggplot(aes(x = family, fill = diet)) +
-  geom_bar(color="black", alpha=0.75) +
+  geom_bar(color="black", alpha=0.75, position="dodge") +
   scale_fill_manual(values = selected_colors) +
   theme() +
   labs(
-    title = "Diet Composition of Top 10 Bird Families",
+    title = "Diet Composition of Emberizidae Familiy",
     x = "Family",
     y = "Number of Birds",
     fill = "Diet"
@@ -124,22 +125,16 @@ ecosphere %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-
-
-```{r}
-table(ecosphere$diet)
-```
-
 ```{r}
 ecosphere %>%
-  filter(family %in% c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae", "Accipitridae", "Icteridae", "Laridae", "Corvidae")) %>% 
+  filter(family =="Emberizidae") %>% 
   ggplot(aes(x = diet, fill = diet)) +
   geom_bar(color = "black", alpha = 0.75) +
   geom_text(stat = "count", aes(label = ..count..), vjust = -0.5) +  # Add text labels
   scale_fill_brewer(palette = "PuBuGn") +
   theme() +
   labs(
-    title = "Diet Composition in Top 10 Recorded Winter Birds",
+    title = "Diet Composition in Emberizidae Family",
     x = "Type of Diet",
     y = "Number of Individuals",
     fill= "Diet"
@@ -153,28 +148,27 @@ In the article, authors make note that bird species that are most prone to extin
 
 ```{r}
 ecosphere %>% 
-  filter(family %in% c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae", "Accipitridae", "Icteridae", "Laridae", "Corvidae")) %>% 
+  filter(family =="Emberizidae") %>% 
   ggplot(aes(x=diet,y=log10_mass,fill=diet))+
   geom_boxplot(color="black", alpha=0.75)+
-  scale_fill_brewer(palette ="PuBuGn")+ #why is color not working
+  scale_fill_brewer(palette ="PuBuGn")+ 
   theme(axis.text.x = element_text(angle = 60, hjust=1))+
-  labs(title="Diet Composition and Bird Weight",
+  labs(title="Diet Composition and Emberizidae Family Weight",
        x= "Type of Diet",
        y="Bird Weight",
        fill="Diet")
 ```
 
-This graph makes it clear that winter birds who rely on nectar as a food source, have significantly smaller weights. While this does not mean this winter bird is doing poor, it demonstrates a difference in survival tactics depending on the diet. In the context of climate change, flowering plants are expected to do poor in habitats with rising temperatures. While more flowers are found to bloom with warmer temperatures, the amount of nectar found is not increasing proportionally. Thus suggesting a decrease in food, which is bound to have negative impacts for winter birds that depend on nectar for survival. From this fact, nectar dependent birds will be excluded from being bird species `less` vulnerable to extinction on the basis of weight.
-
 Determining average weight per diet. Mass is assumed to be recorded in grams, note that weight is measured in log10 scale. 
 ```{r}
 ecosphere %>% 
+  filter(family == "Emberizidae") %>% 
   group_by(diet) %>% 
   summarise(mean_weight=mean(log10_mass))
 ```
 ```{r}
 ecosphere %>%
-  filter(family %in% c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae", "Accipitridae", "Icteridae", "Laridae", "Corvidae")) %>% 
+  filter(family == "Emberizidae") %>% 
   group_by(diet) %>%
   summarise(mean_weight = mean(log10_mass)) %>%
   ggplot(aes(x = diet, y = mean_weight, fill = diet)) +
@@ -191,9 +185,9 @@ ecosphere %>%
 
 ```
 
-
 ```{r}
 ecosphere %>% 
+  filter(family =="Emberizidae") %>% 
   filter(habitat!= "NA") %>% 
   ggplot(aes(x=diet,y=log10_mass,fill=diet))+
   geom_boxplot(position="dodge", color="black", alpha=0.75)+
@@ -203,56 +197,8 @@ ecosphere %>%
        x= "Diet Composition",
        y="Bird Weight",
        fill="Diet")+
-  facet_wrap(~)
+  facet_wrap(~habitat)
 ```
 
-From the prior graph, we learn that birds with the highest body weight are those reliant on vegation and invertebrates have the highest log10mass. 
-
-```{r}
-library(ggplot2)
-library(dplyr)
-
-# Calculate abundance of each family
-family_abundance <- ecosphere %>%
-  group_by(family) %>%
-  summarize(abundance = n())
-
-# Select top 10 most abundant families
-top_10_families <- family_abundance %>%
-  arrange(desc(abundance)) %>%
-  slice_head(n = 10) %>%
-  pull(family)
-
-# Filter data to include only top 10 families
-top_10_data <- ecosphere %>%
-  filter(family %in% top_10_families)
-
-# Create facet wrapped plot
-ggplot(top_10_data, aes(x = diet, y = log10_mass)) +
-  geom_col() +
-    theme(axis.text.x = element_text(angle = 60, hjust=1))+
-  facet_wrap(~ family) +
-  labs(title = "Diet and log10 Mass by Top 10 Most Abundant Families",
-       x = "Diet",
-       y = "log10 Mass")
-
-```
-
-
-
-
-
-
-```{r}
-ecosphere %>% 
-  select(order, family, common_name, diet, log10_mass) %>%
-  filter(diet== "Vegetation" | diet=="Vertebrates" | diet=="Nectar") %>% 
-  ggplot(aes(x=order,fill=diet))+
-  geom_bar(position="dodge",color="black", alpha=0.75)+
-  scale_fill_brewer(palette ="PuBuGn")+
-  theme(axis.text.x = element_text(angle = 60, hjust=1))+
-  facet_wrap(~diet)
-```
-
-In the study, authors conclude that body size can influence the survival status of birds, with larger bodied taxa being at higher risk. In terms of diet, taxa that occupy higher tropic levels face elevated risk of extinction. 
+In the graoh above, we see that while members of the Emberizidae family have the capability to exist in variety of habitats (exluding the ocean), there is a correlation of what habitats they do best in based on the range of body weights observed. We observe see diets in grasslands, shurblands, and woodlands,however it is critical to note the shifting mean of body weight birds in these different habitats are showing. Meaning, a seed diet can be better or worse depending on the habitat. A similar pattern is obsereved in the omnivore and invertebrate diets as well. 
 

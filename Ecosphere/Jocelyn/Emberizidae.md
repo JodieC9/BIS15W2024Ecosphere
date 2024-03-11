@@ -1,7 +1,7 @@
 ---
-title: "Habitat etc."
+title: "Emberizidae"
 author: "Jocelyn Morales"
-date: "2024-03-07"
+date: "2024-03-11"
 output: 
   html_document: 
     keep_md: true
@@ -9,7 +9,6 @@ output:
 
 
 
-#Libraries 
 
 ```r
 library(tidyverse)
@@ -49,87 +48,61 @@ library(RColorBrewer)
 
 
 ```r
-getwd()
-```
-
-```
-## [1] "/Users/jocelynmorales/Desktop/BIS15W2024Group_6/Ecosphere/Jocelyn"
-```
-
-# Load data
-
-```r
 ecosphere <- read.csv("ecosphere.csv", na = c("NA", "")) %>% 
   clean_names()
 ```
 
 
 ```r
-miss_var_summary(ecosphere)
+emberizidae <- ecosphere %>% 
+  filter(family=="Emberizidae")
+```
+
+
+```r
+miss_var_summary(emberizidae)
 ```
 
 ```
 ## # A tibble: 21 × 3
 ##    variable           n_miss pct_miss
 ##    <chr>               <int>    <dbl>
-##  1 population_size       273    49.5 
-##  2 habitat                14     2.54
-##  3 order                   0     0   
-##  4 family                  0     0   
-##  5 common_name             0     0   
-##  6 scientific_name         0     0   
-##  7 diet                    0     0   
-##  8 life_expectancy         0     0   
-##  9 urban_affiliate         0     0   
-## 10 migratory_strategy      0     0   
+##  1 population_size         8     18.6
+##  2 order                   0      0  
+##  3 family                  0      0  
+##  4 common_name             0      0  
+##  5 scientific_name         0      0  
+##  6 diet                    0      0  
+##  7 life_expectancy         0      0  
+##  8 habitat                 0      0  
+##  9 urban_affiliate         0      0  
+## 10 migratory_strategy      0      0  
 ## # ℹ 11 more rows
 ```
 
 
 ```r
-names(ecosphere)
-```
-
-```
-##  [1] "order"                       "family"                     
-##  [3] "common_name"                 "scientific_name"            
-##  [5] "diet"                        "life_expectancy"            
-##  [7] "habitat"                     "urban_affiliate"            
-##  [9] "migratory_strategy"          "log10_mass"                 
-## [11] "mean_eggs_per_clutch"        "mean_age_at_sexual_maturity"
-## [13] "population_size"             "winter_range_area"          
-## [15] "range_in_cbc"                "strata"                     
-## [17] "circles"                     "feeder_bird"                
-## [19] "median_trend"                "lower_95_ci"                
-## [21] "upper_95_ci"
-```
-
-```r
 options(scipen=999)
 ```
 
-# Filter out Habitat
 
 ```r
-ecosphere %>%
+emberizidae %>%
   count(habitat)
 ```
 
 ```
-##     habitat   n
-## 1 Grassland  36
-## 2     Ocean  44
-## 3 Shrubland  82
-## 4   Various  45
-## 5   Wetland 153
-## 6  Woodland 177
-## 7      <NA>  14
+##     habitat  n
+## 1 Grassland 11
+## 2 Shrubland 19
+## 3   Various  4
+## 4   Wetland  4
+## 5  Woodland  5
 ```
 
-#Habitat
 
 ```r
-ecosphere %>%
+ emberizidae%>%
   filter(habitat != "NA") %>% 
   count(habitat) %>% 
   ggplot(aes(x=reorder(habitat, n), y=n))+
@@ -139,28 +112,25 @@ ecosphere %>%
       y= "# of Individuals")
 ```
 
-![](habitat_etc_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+![](Emberizidae_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
-# Migrator Strategy 
 
 ```r
-ecosphere %>% 
+emberizidae %>% 
   count(migratory_strategy)
 ```
 
 ```
-##   migratory_strategy   n
-## 1          Irruptive  12
-## 2               Long  28
-## 3           Moderate 135
-## 4           Resident 139
-## 5              Short 170
-## 6         Withdrawal  67
+##   migratory_strategy  n
+## 1           Moderate 16
+## 2           Resident  7
+## 3              Short 17
+## 4         Withdrawal  3
 ```
 
 
 ```r
-ecosphere %>%
+emberizidae %>% 
   count(migratory_strategy) %>% 
   ggplot(aes(x=reorder(migratory_strategy, n), y=n))+
   geom_col()+
@@ -169,11 +139,11 @@ ecosphere %>%
        y= "Count")
 ```
 
-![](habitat_etc_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+![](Emberizidae_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
 
 ```r
-ecosphere %>% 
+emberizidae %>% 
   filter(habitat != "NA") %>%
   ggplot(aes(x=urban_affiliate, y=winter_range_area, fill = migratory_strategy))+
   geom_boxplot()+
@@ -183,7 +153,25 @@ ecosphere %>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 ```
 
-![](habitat_etc_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+![](Emberizidae_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
 
 
+```r
+emberizidae %>% 
+  ggplot(aes(x=migratory_strategy, y=winter_range_area, fill = habitat))+
+  geom_col(position = "dodge")+
+  scale_fill_brewer(palette = "PuBuGn")+
+  coord_flip()
+```
+
+![](Emberizidae_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
+
+```r
+emberizidae %>% 
+  ggplot(aes(x=urban_affiliate, fill = migratory_strategy))+
+  geom_bar(position = "dodge")+
+  scale_fill_brewer(palette = "PuBuGn")
+```
+
+![](Emberizidae_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
 

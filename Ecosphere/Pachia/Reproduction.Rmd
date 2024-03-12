@@ -31,33 +31,15 @@ ecosphere %>%
 ```
 
 ```{r}
-ecosphere_new<-ecosphere %>% 
-  select(family, population_size, life_expectancy, mean_eggs_per_clutch, mean_age_at_sexual_maturity) %>% 
-  filter(population_size!="NA") %>% 
-  arrange(desc(population_size)) 
-```
-
-```{r}
-top_10<-ecosphere_new %>% 
-  count(family) %>% 
-  arrange(desc(n)) %>% 
-  slice_head(n=10)
-```
-
-```{r}
-names(ecosphere_new)
-```
-
-```{r}
-options(scipen = 999)
+anatidae<-ecosphere %>% 
+  filter(family=="Anatidae")
 ```
 
 
 ```{r}
-top_10%>% 
-  ggplot(aes(x=family, y=n, fill=family))+
+anatidae%>% 
+  ggplot(aes(x=family, y=population_size, fill=family))+
   geom_col(alpha=0.5)+
-  coord_flip()+
   labs(title="Family by Population Size",
        x="Family",
        y="Population Size")+

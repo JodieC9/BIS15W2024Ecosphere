@@ -1,0 +1,119 @@
+---
+title: "Reproduction, Life Expectancy"
+author: "Pachia Lee"
+date: "`r Sys.Date()`"
+---
+```{r}
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(RColorBrewer)
+library(paletteer)
+```
+
+```{r}
+#install.packages("RColorBrewer")
+#install.packages("paletteer")
+#install.packages("ggthemes")
+```
+
+Loading data
+```{r}
+ecosphere<- read_csv("ecosphere.csv") %>% clean_names()
+```
+
+```{r}
+options(scipen = 999)
+```
+
+
+
+Structure of Data
+```{r}
+summary(ecosphere)
+```
+
+```{r}
+names(ecosphere)
+```
+```{r}
+display.brewer.pal(10,"PuBuGn") #sequential palette
+```
+
+
+
+##Create a plot that compares the top ten families and their population sizes
+```{r}
+ecosphere %>% 
+  count(family)
+```
+
+```{r}
+ecosphere %>% 
+  filter(family=="Emberizidae")
+```
+
+```{r}
+ecosphere %>% 
+  filter(family=="Emberizidae") %>%
+  ggplot(aes(x = common_name, y = population_size, fill=common_name)) +
+  geom_col() +
+  coord_flip()
+  scale_fill_brewer(palette ="PuBuGn")+
+  theme(legend.position = "top",
+        axis.text.x = element_text(angle = 60, hjust=1))+
+  labs(title = "Population Size of Emberizidae Family",
+       y = "Population Size") 
+```
+
+
+##Create a plot that compares Emberizidae and life expectancy ranges
+```{r}
+ecosphere %>% 
+  filter(family=="Emberizidae") %>% 
+  ggplot(aes(x = common_name, y = life_expectancy, fill=life_expectancy)) +
+  geom_col() +
+  scale_fill_brewer(palette = "PuBuGn")+
+  labs(title = "Life Expectancy Ranges of the Family Emberizidae ",
+       x = "Common Name",
+       y = "Life Expectancy") +
+  theme(axis.text.x=element_text(size=12),axis.text.y = element_text(size = 6))+
+  coord_flip()
+```
+
+```{r}
+ecosphere %>% 
+  filter(family=="Emberizidae") %>% 
+  ggplot(aes(x = common_name, y = mean_eggs_per_clutch , fill=mean_eggs_per_clutch)) +
+  geom_col() +
+  scale_color_brewer(palette = "PuBuGn")+
+  coord_flip()+
+  labs(title = "Mean Eggs per Clutch in the Family Emberizidae ",
+       x = "Common Name",
+       y = "Mean Eggs Per Clutch") +
+  theme(axis.text.x=element_text(size=12),axis.text.y = element_text(size = 6))
+```
+
+```{r}
+ecosphere %>% 
+  filter(family=="Emberizidae") %>% 
+  ggplot(aes(x = reorder(common_name, mean_age_at_sexual_maturity), y = mean_age_at_sexual_maturity, fill=mean_age_at_sexual_maturity)) +
+  geom_col()+
+  scale_color_brewer(palette ="PuBuGn")+
+  coord_flip()+
+  labs(title = "Mean Age of Sexual Maturity in Emberizidae ",
+       x = "Common Name",
+       y = "Ages") +
+  theme(axis.text.x=element_text(size=12),axis.text.y = element_text(size = 6))
+```
+
+```{r}
+ecosphere %>% 
+  filter(family=="Emberizidae") %>% 
+  ggplot(aes(x = life_expectancy, y = mean_eggs_per_clutch, color=common_name)) +
+  geom_col()+
+  scale_colour_brewer(palette = "PuBuGn")+
+  labs(title="How long birds lived and ")
+```
+
+

@@ -1,0 +1,60 @@
+---
+title: "ecosphere_app"
+output: 
+  html_document: 
+    keep_md: yes
+date: "2024-03-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Load the Libraries
+```{r}
+library("tidyverse")
+library("janitor")
+library("naniar")
+library("RColorBrewer")
+```
+
+## Load the Data
+```{r}
+ecosphere <- read_csv("ecosphere.csv") %>% clean_names() 
+ecosphere
+```
+
+# About our App 
+In our app, users will be able to select a habitat location and species to learn more about that species's life history events. The life history events available for users to learn about per species and habitat include: 
+
+Migration/range size, urban tolerance, population size, life expectancy, reproduction rates, log10mass, and diet. 
+
+
+```{r}
+ecosphere <- ecosphere %>%
+  rename(species = scientific_name)
+#Changed the old variable name of "scientific_name" to "species" to make app building easier 
+```
+
+## Top 5 Most Abundant Families 
+All graphs are made using a sub-category of data with information ONLY about the 10 top most abundant families in the data. This is done to make the number of observations on the x-axis more manageable.
+
+As such, the only families that will be included in the graphs shown in our app, are from the families listed above. 
+```{r}
+names(ecosphere)
+```
+
+
+```{r}
+top5_families <- c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Tyrannidae")
+
+top5_ecosphere <- ecosphere %>%
+  select(order, diet, migratory_strategy, population_size, circles, upper_95_percent_ci, 
+         family, life_expectancy, log10_mass, winter_range_area, feeder_bird, common_name, 
+         habitat, mean_eggs_per_clutch, range_in_cbc, median_trend, species, urban_affiliate, 
+         mean_eggs_per_clutch, strata, lower_95_percent_ci) %>%
+  filter(family %in% top5_families)
+
+top5_ecosphere
+```

@@ -1,0 +1,117 @@
+---
+title: "Habitat etc."
+author: "Jocelyn Morales"
+date: "2024-03-07"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Libraries 
+```{r}
+library(tidyverse)
+library(janitor)
+library(naniar)
+library(RColorBrewer)
+```
+
+
+```{r}
+getwd()
+```
+
+# Load data
+```{r}
+ecosphere <- read.csv("ecosphere.csv", na = c("NA", "")) %>% 
+  clean_names()
+```
+
+```{r}
+miss_var_summary(ecosphere)
+```
+
+```{r}
+names(ecosphere)
+options(scipen=999)
+```
+
+# Filter out Habitat
+```{r}
+ecosphere %>%
+  count(habitat)
+```
+
+#Habitat
+```{r}
+ecosphere %>%
+  filter(habitat != "NA") %>% 
+  count(habitat) %>% 
+  ggplot(aes(x=reorder(habitat, n), y=n))+
+  geom_col()+
+  labs(title = "Number of Indvividuals in Each Habitat",
+      x="Habitat",
+      y= "# of Individuals")
+```
+
+# Migrator Strategy 
+```{r}
+ecosphere %>% 
+  count(migratory_strategy)
+```
+
+```{r}
+ecosphere %>%
+  count(migratory_strategy) %>% 
+  ggplot(aes(x=reorder(migratory_strategy, n), y=n))+
+  geom_col()+
+  labs(title = "Number of Individuals with Preferred Migratory Strategy",
+       x= "Migratory Strategy",
+       y= "Count")
+```
+
+```{r}
+ecosphere %>% 
+  filter(habitat != "NA") %>%
+  ggplot(aes(x=urban_affiliate, y=winter_range_area, fill = migratory_strategy))+
+  geom_boxplot()+
+  scale_fill_brewer(palette = "PuBuGn")+
+  scale_y_log10()+
+  facet_wrap(~ habitat)+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+Do the same graph from above but for the top 5 families. 
+
+```{r}
+ecosphere %>%
+  select(order, family, common_name, habitat, urban_affiliate, winter_range_area, migratory_strategy) %>%
+  filter(habitat != "NA") %>%
+  group_by(family) %>%
+  summarise(individuals_per_family = n()) %>%
+  arrange(desc(individuals_per_family)) %>%
+  top_n(5) %>%
+  inner_join(ecosphere, by = "family") %>%
+  ggplot(aes(x = urban_affiliate, y = winter_range_area, fill = family, color = migratory_strategy)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "PuBuGn") +
+  scale_y_log10() +
+  facet_wrap(~ habitat, ncol = 2) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+
+```{r}
+ecosphere %>% 
+  filter(habitat != "NA") %>%
+  ggplot(aes(x=urban_affiliate, y=winter_range_area, fill = migratory_strategy))+
+  geom_boxplot()+
+  scale_fill_brewer(palette = "PuBuGn")+
+  scale_y_log10()+
+  facet_wrap(~ habitat)+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+

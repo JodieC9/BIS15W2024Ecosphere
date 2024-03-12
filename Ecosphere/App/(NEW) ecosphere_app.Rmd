@@ -26,9 +26,9 @@ ecosphere
 ```
 
 # About our App 
-In our app, users will be able to select a habitat location and species to learn more about that species's life history events. The life history events available for users to learn about per species and habitat include: 
+In our app, users will be able to select a habitat location (Grassland, Shrubland, Woodland, Wetland) and learn more about the life history events in that specific location. The life history events available for users to learn about per species and habitat include: 
 
-Migration/range size, urban tolerance, population size, life expectancy, reproduction rates, log10mass, and diet. 
+Winter range size, urban tolerance, life expectancy, reproduction rates, mass(g), and diet. 
 
 
 ```{r}
@@ -45,7 +45,6 @@ As such, the only families that will be included in the graphs shown in our app,
 names(ecosphere)
 ```
 
-
 ```{r}
 top5_families <- c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Tyrannidae")
 
@@ -57,4 +56,134 @@ top5_ecosphere <- ecosphere %>%
   filter(family %in% top5_families)
 
 top5_ecosphere
+```
+
+```{r}
+emberizidae <- top5_ecosphere %>% 
+  filter(family=="Emberizidae")
+emberizidae
+```
+
+
+## Making the App 
+
+## Loading the Libraries
+```{r}
+library(tidyverse)
+library(shiny)
+#install.packages("shinydashboard")
+library(shinydashboard)
+```
+
+```{r}
+library(shiny)
+library(shinydashboard)
+library(ggplot2)
+library(dplyr)
+
+# Assuming you have your dataset stored in emberizidae
+# emberizidae <- read.csv("your_dataset.csv"
+
+# Define your dataset
+emberizidae <- data.frame(
+  habitat = c("Grassland", "Grassland", "Shrubland", "Shrubland", "Woodland", "Woodland", "Wetland", "Wetland"),
+  diet = c("Invertebrates", "Omnivores", "Vertebrates", "Invertebrates", "Omnivores", "Vertebrates", "Invertebrates", "Omnivores"),
+  life_expectancy = c("Short", "Middle", "Long", "Short", "Middle", "Long", "Short", "Middle")
+)
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Emberizidae"),
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Dashboard", tabName = "dashboard", icon = icon("pen")),
+      menuItem("Ecosphere Variables", tabName = "information", icon = icon("list"))
+    )
+  ),
+  dashboardBody(
+    tabItems(
+      tabItem(tabName = "dashboard",
+              fluidRow(
+                box(title = "Select Habitat!", width = 12,
+                    selectInput("x", "Habitat Type", choices = c("Grassland", "Shrubland", "Woodland", "Wetland"),
+                                selected = "Grassland"),
+                    plotOutput("plot1"),
+                    plotOutput("plot2")
+                )
+              )
+      ),
+      tabItem(tabName = "information",
+              h2("Ecosphere Variables Section"),
+              fluidRow(
+                box(title = "Defining our Variables",width= 11,
+                    HTML("<ul>
+                          <li>Winter Range Size: The area of species’ winter range (in square kilometers)</li>
+                          <li>Urban Tolerance:
+                            <ul>
+                              <li>No: Species is not synanthropic (DO NOT LIVE NEAR HUMANS)</li>
+                              <li>Yes: Species is synanthropic (LIVE NEAR HUMANS)</li>
+                            </ul>
+                          </li>
+                          <li>Life Expectancy: 
+                            <ul>
+                              <li>Short: Lifespan is <10 years in the wild</li>
+                              <li>Middle: Lifespan is 10-20 years in the wild</li>
+                              <li>Long: Lifespan is >20 years in the wild</li>
+                            </ul>
+                          </li>
+                          <li>Reproduction Rates: 
+                            <ul>
+                              <li>mean eggs per clutch: the mean # of eggs laid per clutch</li>
+                              <li>mean age of sexual maturity: mean age at which the species becomes sexually mature</li>
+                              <li>Mass(g): Body mass in grams</li>
+                          </ul>
+                          </li>
+                          <li>Diet: 
+                            <ul>
+                              <li>Invertebrates: primarily feed on invertebrates ex: insects</li>
+                              <li>Omnivores: diet is composed of both plants and animal matter</li>
+                              <li>Vertebrates: primarily feed on vertebrates by hunting or scavenging</li>
+                            </ul>
+                          </li>
+                        </ul>")
+                )  # closes box
+              )
+      )
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  output$plot1 <- renderPlot({
+    filtered_data <- emberizidae %>%
+      filter(habitat == input$x)
+    
+    ggplot(filtered_data, aes(x = habitat, y = diet, fill = diet)) + 
+      geom_col(color = "black", alpha = 0.75, position = "dodge") +
+      scale_fill_brewer(palette = "PuBuGn") +
+      theme() +
+      labs(title = "Diet by Habitat", 
+           x = "Habitat",
+           y = "Diet")
+  })
+  
+  output$plot2 <- renderPlot({
+    filtered_data2 <- emberizidae %>%
+      filter(habitat == input$x)
+    
+    ggplot(filtered_data2, aes(x = habitat, y = life_expectancy, fill = life_expectancy)) +
+      geom_bar(color = "black", alpha = 0.75, position = "dodge") +
+      scale_fill_brewer(palette = "PuBuGn") +
+      theme() +
+      labs(title = "Life Expectancy by Habitat", 
+           x = "Habitat",
+           y = "Life Expectancy")
+  })
+  
+  session$onSessionEnded(stopApp)
+}
+
+shinyApp(ui, server)
+
+
+
 ```

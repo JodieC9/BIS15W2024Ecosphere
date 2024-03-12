@@ -189,6 +189,7 @@ ecosphere %>%
 ecosphere %>% 
   filter(family =="Emberizidae") %>% 
   filter(habitat!= "NA") %>% 
+  filter(habitat!= "Various") %>% 
   ggplot(aes(x=diet,y=log10_mass,fill=diet))+
   geom_boxplot(position="dodge", color="black", alpha=0.75)+
   scale_fill_brewer(palette ="PuBuGn")+

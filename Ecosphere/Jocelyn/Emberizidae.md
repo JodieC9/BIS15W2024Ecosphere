@@ -4,7 +4,7 @@ author: "Jocelyn Morales"
 date: "2024-03-11"
 output: 
   html_document: 
-    keep_md: true
+    keep_md: yes
 ---
 
 
@@ -16,10 +16,10 @@ library(tidyverse)
 
 ```
 ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ dplyr     1.1.4     ✔ readr     2.1.4
 ## ✔ forcats   1.0.0     ✔ stringr   1.5.1
 ## ✔ ggplot2   3.4.4     ✔ tibble    3.2.1
-## ✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+## ✔ lubridate 1.9.3     ✔ tidyr     1.3.0
 ## ✔ purrr     1.0.2     
 ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 ## ✖ dplyr::filter() masks stats::filter()
@@ -103,11 +103,12 @@ emberizidae %>%
 
 ```r
  emberizidae%>%
-  filter(habitat != "NA") %>% 
+  filter(habitat != "NA" & habitat != "Various") %>% 
   count(habitat) %>% 
-  ggplot(aes(x=reorder(habitat, n), y=n))+
-  geom_col()+
-  labs(title = "Number of Indvividuals in Each Habitat",
+  ggplot(aes(x=reorder(habitat, n), y=n, fill = habitat))+
+  geom_col(color = "black", alpha=0.75)+
+  scale_fill_brewer(palette = "PuBuGn")+
+  labs(title = "Number of Individuals in Each Habitat",
       x="Habitat",
       y= "# of Individuals")
 ```
@@ -132,8 +133,9 @@ emberizidae %>%
 ```r
 emberizidae %>% 
   count(migratory_strategy) %>% 
-  ggplot(aes(x=reorder(migratory_strategy, n), y=n))+
-  geom_col()+
+  ggplot(aes(x=reorder(migratory_strategy, n), y=n, fill = migratory_strategy))+
+  geom_col(color = "black", alpha=0.75)+
+  scale_fill_brewer(palette = "PuBuGn")+
   labs(title = "Number of Individuals with Preferred Migratory Strategy",
        x= "Migratory Strategy",
        y= "Count")
@@ -144,9 +146,9 @@ emberizidae %>%
 
 ```r
 emberizidae %>% 
-  filter(habitat != "NA") %>%
+  filter(habitat != "NA" & habitat != "Various") %>%
   ggplot(aes(x=urban_affiliate, y=winter_range_area, fill = migratory_strategy))+
-  geom_boxplot()+
+  geom_boxplot(color = "black", alpha = 0.75)+
   scale_fill_brewer(palette = "PuBuGn")+
   scale_y_log10()+
   facet_wrap(~ habitat)+
@@ -159,19 +161,35 @@ emberizidae %>%
 ```r
 emberizidae %>% 
   ggplot(aes(x=migratory_strategy, y=winter_range_area, fill = habitat))+
-  geom_col(position = "dodge")+
+  geom_col (position = "dodge", color = "black", alpha=0.75)+
   scale_fill_brewer(palette = "PuBuGn")+
   coord_flip()
 ```
 
 ![](Emberizidae_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
+
 ```r
 emberizidae %>% 
   ggplot(aes(x=urban_affiliate, fill = migratory_strategy))+
-  geom_bar(position = "dodge")+
+  geom_bar(position = "dodge", color = "black", alpha=0.75)+
   scale_fill_brewer(palette = "PuBuGn")
 ```
 
 ![](Emberizidae_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+
+
+```r
+emberizidae %>% 
+  filter(habitat != "NA" & habitat != "Various") %>%
+  ggplot(aes(x=reorder(habitat, winter_range_area), y=winter_range_area, fill = habitat))+
+  geom_col(position = position_dodge(width = 0.8), color = "black", alpha = 0.75, width = 0.7)+
+  scale_fill_brewer(palette = "PuBuGn")+
+  labs(x="habitat")
+```
+
+![](Emberizidae_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+
+
+
 

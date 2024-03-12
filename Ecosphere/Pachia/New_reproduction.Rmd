@@ -8,7 +8,7 @@ library(tidyverse)
 library(janitor)
 library(lubridate)
 library(RColorBrewer)
-library(paletteer)
+#library(paletteer)
 ```
 
 ```{r}
@@ -78,7 +78,7 @@ ecosphere %>%
 ```{r}
 ecosphere %>% 
   ggplot(aes(x=life_expectancy, fill=life_expectancy))+
-  geom_bar()+
+  geom_bar(color="black")+
   scale_fill_brewer(palette = "PuBuGn")+
   labs(title = "Life Expectancy Ranges of the Family Emberizidae ",
        x = "Common Name",
@@ -126,6 +126,7 @@ ecosphere %>%
 ecosphere %>% 
   filter(family==c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae")) %>% 
   ggplot(aes(x=family, y=mean_eggs_per_clutch, fill=family))+
+   scale_fill_brewer(palette = "PuBuGn")+
   geom_boxplot()
 ```
 
@@ -133,7 +134,8 @@ ecosphere %>%
 ecosphere %>% 
   filter(family==c("Anatidae", "Emberizidae", "Parulidae")) %>% 
   ggplot(aes(x=mean_eggs_per_clutch, fill=family))+
-  geom_density(alpha=0.5)
+  geom_density(alpha=0.5)+
+   scale_fill_brewer(palette = "PuBuGn")
   
 ```
 
@@ -141,8 +143,10 @@ ecosphere %>%
 ```{r}
 ecosphere %>% 
   filter(family=="Emberizidae") %>% 
-  ggplot(aes(x=mean_eggs_per_clutch))+
-  geom_density()
+  ggplot(aes(x=mean_eggs_per_clutch, fill=family))+
+  geom_density(alpha=0.6)+
+   scale_fill_brewer(palette = "PuBuGn")
+  
 ```
 
 ```{r}

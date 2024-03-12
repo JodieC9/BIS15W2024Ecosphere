@@ -65,11 +65,9 @@ ecosphere %>%
 ```{r}
 ecosphere %>% 
   ggplot(aes(x=life_expectancy, fill=life_expectancy))+
-  geom_bar()+
+  geom_bar(color="black", alpha=0.75)+
   scale_fill_brewer(palette = "PuBuGn")+
-  labs(title = "Life Expectancy Ranges of the Family Emberizidae ",
-       x = "Common Name",
-       y = "Life Expectancy")
+  labs(title = "Life Expectancy Ranges of the Family Emberizidae ")
 ```
 
 
@@ -113,7 +111,7 @@ ecosphere %>%
 ecosphere %>% 
   filter(family==c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae")) %>% 
   ggplot(aes(x=family, y=mean_eggs_per_clutch, fill=family))+
-  geom_boxplot(alpha=1)+
+  geom_boxplot(color="black", alpha=0.75)+
   scale_fill_brewer(palette = "PuBuGn")+
   labs(title="Mean Eggs per Clutch in the Top Most Populated Families")
 ```
@@ -132,7 +130,7 @@ ecosphere %>%
 ecosphere %>%
   filter(family == "Emberizidae") %>%
   ggplot(aes(x = mean_eggs_per_clutch, fill = family)) +
-  geom_density(alpha = 0.75, fill = "#cbc3e3") +
+  geom_density(color="black", alpha = 0.75, fill = "#cbc3e3") +
   labs(title = "Mean Eggs per Clutch of Emberizidae")
 ```
 
@@ -167,15 +165,56 @@ ecosphere %>%
 
 
 ```{r}
-ecosphere %>%
-  filter(family %in% c("Anatidae", "Emberizidae", "Parulidae")) %>%
-  group_by(family) %>%
-  summarize(mean_eggs_family = mean(mean_eggs_per_clutch, na.rm = TRUE),
-            mean_age_sexual_maturity = mean(mean_age_at_sexual_maturity, na.rm = TRUE)) %>%
-  ggplot(aes(x = mean_age_sexual_maturity, y = mean_eggs_family, fill = family)) +
-  geom_col() +
-  scale_fill_brewer(palette = "PuBuGn") +
-  labs(title = "Mean Age of Sexual Maturity in the Top 3 Most Populated Families")
+ecosphere %>% 
+  filter(family=="Emberizidae") %>% 
+  ggplot(aes(x=mean_age_at_sexual_maturity , fill=family))+
+  geom_density(alpha=0.5)+
+  scale_fill_brewer(palette = "PuBuGn")+
+  labs(title="Mean Age of Sexual Maturity in Emberizidae Song Birds")
 ```
+
+##Shiny App
+```{r}
+ui <- dashboardPage(
+  dashboardHeader(title="Sex Composition by Wolve Population"),
+  dashboardSidebar(disable=T),
+  dashboardBody(
+    fluidRow(
+    box(width = 3,
+        
+        
+    selectInput("x", "Select Population", choices =unique(wolves$pop)), hr()#gives some help with multiple observations
+), 
+  
+  box(width=7,
+      plotOutput("plot", width="600px", height="400px")
+)
+)
+)
+)
+  
+server <- function(input,output){
+   session$onSessionEnded(stopApp) #automatically stop the app when we close it
+  
+  output$plot <- renderPlot({
+  wolves %>% 
+      filter(sex!="NA") %>% 
+      filter(pop==inputs$x) %>% #filtr is the reactive part
+      ffplot(aes(x=sex,fill=sex))+
+      geom_bar()
+    })
+}
+
+shinyApp(ui, server)
+```
+
+
+
+
+
+
+
+
+
 
 

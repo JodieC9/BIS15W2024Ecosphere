@@ -71,6 +71,24 @@ ecosphere %>%
 ```{r}
 ecosphere %>% 
   filter(family=="Emberizidae") %>% 
+  group_by(life_expectancy) %>% 
+  summarize(n=n())
+```
+
+```{r}
+ecosphere %>% 
+  ggplot(aes(x=life_expectancy, fill=life_expectancy))+
+  geom_bar()+
+  scale_fill_brewer(palette = "PuBuGn")+
+  labs(title = "Life Expectancy Ranges of the Family Emberizidae ",
+       x = "Common Name",
+       y = "Life Expectancy")
+```
+
+
+```{r}
+ecosphere %>% 
+  filter(family=="Emberizidae") %>% 
   ggplot(aes(x = common_name, y = life_expectancy, fill=life_expectancy)) +
   geom_col() +
   scale_fill_brewer(palette = "PuBuGn")+
@@ -79,6 +97,52 @@ ecosphere %>%
        y = "Life Expectancy") +
   theme(axis.text.x=element_text(size=12),axis.text.y = element_text(size = 6))+
   coord_flip()
+```
+
+```{r}
+ecosphere %>% 
+  filter(family=="Emberizidae") %>% 
+  group_by(life_expectancy) %>% 
+  summarize(n=n())
+```
+
+```{r}
+ecosphere %>% 
+  group_by(family) %>% 
+  summarize(n=n())  %>% 
+  top_n(5) %>% 
+  arrange(desc(n))
+  
+```
+
+```{r}
+ecosphere %>% 
+  filter(family==c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae")) %>% 
+  group_by(family) %>% 
+  summarize(mean_eggs_family=mean(mean_eggs_per_clutch, na.rm=T))
+```
+
+```{r}
+ecosphere %>% 
+  filter(family==c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae")) %>% 
+  ggplot(aes(x=family, y=mean_eggs_per_clutch, fill=family))+
+  geom_boxplot()
+```
+
+```{r}
+ecosphere %>% 
+  filter(family==c("Anatidae", "Emberizidae", "Parulidae")) %>% 
+  ggplot(aes(x=mean_eggs_per_clutch, fill=family))+
+  geom_density(alpha=0.5)
+  
+```
+
+
+```{r}
+ecosphere %>% 
+  filter(family=="Emberizidae") %>% 
+  ggplot(aes(x=mean_eggs_per_clutch))+
+  geom_density()
 ```
 
 ```{r}

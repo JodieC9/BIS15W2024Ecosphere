@@ -53,26 +53,13 @@ ecosphere %>%
   filter(family=="Emberizidae")
 ```
 
-```{r}
-ecosphere %>% 
-  filter(family=="Emberizidae") %>%
-  ggplot(aes(x = common_name, y = population_size, fill=common_name)) +
-  geom_col() +
-  coord_flip()
-  scale_fill_brewer(palette ="PuBuGn")+
-  theme(legend.position = "top",
-        axis.text.x = element_text(angle = 60, hjust=1))+
-  labs(title = "Population Size of Emberizidae Family",
-       y = "Population Size") 
-```
-
 
 ##Create a plot that compares Emberizidae and life expectancy ranges
 ```{r}
 ecosphere %>% 
   filter(family=="Emberizidae") %>% 
   group_by(life_expectancy) %>% 
-  summarize(n=n())
+  summarize(n=n())#number of observations in that variable
 ```
 
 ```{r}
@@ -126,23 +113,27 @@ ecosphere %>%
 ecosphere %>% 
   filter(family==c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae")) %>% 
   ggplot(aes(x=family, y=mean_eggs_per_clutch, fill=family))+
-  geom_boxplot()
+  geom_boxplot(alpha=1)+
+  scale_fill_brewer(palette = "PuBuGn")+
+  labs(title="Mean Eggs per Clutch in the Top Most Populated Families")
 ```
 
 ```{r}
 ecosphere %>% 
   filter(family==c("Anatidae", "Emberizidae", "Parulidae")) %>% 
   ggplot(aes(x=mean_eggs_per_clutch, fill=family))+
-  geom_density(alpha=0.5)
+  geom_density(alpha=0.75)+
+  scale_fill_brewer(palette = "PuBuGn")
   
 ```
 
 
 ```{r}
-ecosphere %>% 
-  filter(family=="Emberizidae") %>% 
-  ggplot(aes(x=mean_eggs_per_clutch))+
-  geom_density()
+ecosphere %>%
+  filter(family == "Emberizidae") %>%
+  ggplot(aes(x = mean_eggs_per_clutch, fill = family)) +
+  geom_density(alpha = 0.75, fill = "#cbc3e3") +
+  labs(title = "Mean Eggs per Clutch of Emberizidae")
 ```
 
 ```{r}
@@ -160,24 +151,31 @@ ecosphere %>%
 
 ```{r}
 ecosphere %>% 
-  filter(family=="Emberizidae") %>% 
-  ggplot(aes(x = reorder(common_name, mean_age_at_sexual_maturity), y = mean_age_at_sexual_maturity, fill=mean_age_at_sexual_maturity)) +
-  geom_col()+
-  scale_color_brewer(palette ="PuBuGn")+
-  coord_flip()+
-  labs(title = "Mean Age of Sexual Maturity in Emberizidae ",
-       x = "Common Name",
-       y = "Ages") +
-  theme(axis.text.x=element_text(size=12),axis.text.y = element_text(size = 6))
+  filter(family==c("Emberizidae", "Parulidae", "Scolopacidae", "Picidae", "Tyrannidae")) %>% 
+  group_by(family) %>% 
+  summarize(mean_age_sexual_maturity=mean(mean_age_at_sexual_maturity , na.rm=T))
 ```
 
 ```{r}
 ecosphere %>% 
-  filter(family=="Emberizidae") %>% 
-  ggplot(aes(x = life_expectancy, y = mean_eggs_per_clutch, color=common_name)) +
-  geom_col()+
-  scale_colour_brewer(palette = "PuBuGn")+
-  labs(title="How long birds lived and ")
+  filter(family==c("Anatidae", "Emberizidae", "Parulidae")) %>% 
+  ggplot(aes(x=mean_age_at_sexual_maturity , fill=family))+
+  geom_density(alpha=0.5)+
+  scale_fill_brewer(palette = "PuBuGn")+
+  labs(title="Mean Age of Sexual Maturity in the Top 3 Most Populated Families")
+```
+
+
+```{r}
+ecosphere %>%
+  filter(family %in% c("Anatidae", "Emberizidae", "Parulidae")) %>%
+  group_by(family) %>%
+  summarize(mean_eggs_family = mean(mean_eggs_per_clutch, na.rm = TRUE),
+            mean_age_sexual_maturity = mean(mean_age_at_sexual_maturity, na.rm = TRUE)) %>%
+  ggplot(aes(x = mean_age_sexual_maturity, y = mean_eggs_family, fill = family)) +
+  geom_col() +
+  scale_fill_brewer(palette = "PuBuGn") +
+  labs(title = "Mean Age of Sexual Maturity in the Top 3 Most Populated Families")
 ```
 
 

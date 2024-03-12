@@ -79,6 +79,7 @@ Each graph will be specific to the family the user selects
 ```{r}
 #Bird mass and diet 
 top10_ecosphere%>% 
+  filter(family =="Emberizidae") %>% 
   ggplot(aes(x=diet,y=log10_mass,fill=diet))+
   geom_boxplot(color="black", alpha=0.75)+
   scale_fill_brewer(palette ="PuBuGn")+
@@ -91,6 +92,7 @@ top10_ecosphere%>%
 ```
 ```{r}
 top10_ecosphere%>% 
+  filter(family =="Emberizidae") %>% 
   ggplot(aes(x=diet,y=log10_mass,fill=diet))+
   geom_boxplot(color="black", alpha=0.75)+
   scale_fill_brewer(palette ="PuBuGn")+
@@ -111,11 +113,11 @@ custom_format <- function(x) {
 }
 
 top10_ecosphere %>% 
+  filter(family =="Emberizidae") %>% 
   ggplot(aes(x = migratory_strategy, y = winter_range_area, fill=family)) +
   geom_boxplot(color = "black", alpha = 0.75) +
   scale_fill_brewer(palette = "PuBuGn") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-  scale_y_continuous(labels = custom_format) +  # Apply custom formatting to y-axis
   labs(title = "Winter Range Area by Migratory Strategy",
        x = "Migratory Strategy",
        y = "Winter Range Area")+
@@ -128,11 +130,11 @@ top10_ecosphere %>%
 
 top10_ecosphere
 top10_ecosphere %>% 
+  filter(family =="Emberizidae") %>% 
   ggplot(aes(y = population_size, x = life_expectancy, fill=family)) +
   geom_col(color = "black", alpha = 0.75, position="dodge") +
   scale_fill_brewer(palette = "PuBuGn") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-  scale_y_continuous(labels = custom_format) +  # Apply custom formatting to y-axis
   labs(title = "Population Size by Life Expectancy",
        y = "Population Size",
        x = "Life Expectancy")
@@ -146,6 +148,7 @@ custom_format <- function(x) {
 }
 
 top10_ecosphere %>% 
+  filter(family =="Emberizidae") %>% 
   ggplot(aes(x = population_size, y = mean_eggs_per_clutch, fill=family)) +
   geom_point(color = "black", alpha = 0.75, position="dodge") +
   scale_color_brewer(palette = "PuBuGn")+
@@ -245,5 +248,37 @@ server <- function(input, output, session) {
 # Run the application
 shinyApp(ui = ui, server = server)
 
+```
+
+
+
+## Graphs! 
+```{r}
+top10_ecosphere %>% 
+  filter(family =="Emberizidae") %>% 
+  ggplot(aes(x = diet, y = life_expectancy, fill=family)) +
+  geom_col(color = "black", alpha = 0.75, position="dodge") +
+  scale_fill_brewer(palette = "PuBuGn") 
+```
+
+```{r}
+top10_ecosphere %>%
+  filter(habitat!= "NA") %>%
+  filter(family =="Emberizidae") %>% 
+  ggplot(aes(x = habitat, y = diet, fill=family)) +
+  geom_col(color = "black", alpha = 0.75, position="dodge") +
+  scale_fill_brewer(palette = "PuBuGn")+ 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  facet_wrap(~family)
+```
+
+```{r}
+top10_ecosphere %>%
+  filter(habitat!= "NA") %>% 
+  filter(family == "Emberizidae") %>% 
+  ggplot(aes(x = family, y = mean_eggs_per_clutch, fill=habitat)) +
+  geom_col(color = "black", alpha = 0.75, position="dodge") +
+  scale_fill_brewer(palette = "PuBuGn")+ 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) 
 ```
 

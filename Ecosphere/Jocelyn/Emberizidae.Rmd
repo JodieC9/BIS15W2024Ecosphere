@@ -1,7 +1,7 @@
 ---
-title: "Habitat etc."
+title: "Emberizidae"
 author: "Jocelyn Morales"
-date: "2024-03-07"
+date: "2024-03-11"
 output: 
   html_document: 
     keep_md: true
@@ -11,7 +11,6 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#Libraries 
 ```{r}
 library(tidyverse)
 library(janitor)
@@ -21,33 +20,30 @@ library(RColorBrewer)
 
 
 ```{r}
-getwd()
-```
-
-# Load data
-```{r}
 ecosphere <- read.csv("ecosphere.csv", na = c("NA", "")) %>% 
   clean_names()
 ```
 
 ```{r}
-miss_var_summary(ecosphere)
+emberizidae <- ecosphere %>% 
+  filter(family=="Emberizidae")
 ```
 
 ```{r}
-names(ecosphere)
+miss_var_summary(emberizidae)
+```
+
+```{r}
 options(scipen=999)
 ```
 
-# Filter out Habitat
 ```{r}
-ecosphere %>%
+emberizidae %>%
   count(habitat)
 ```
 
-#Habitat
 ```{r}
-ecosphere %>%
+ emberizidae%>%
   filter(habitat != "NA") %>% 
   count(habitat) %>% 
   ggplot(aes(x=reorder(habitat, n), y=n))+
@@ -57,14 +53,13 @@ ecosphere %>%
       y= "# of Individuals")
 ```
 
-# Migrator Strategy 
 ```{r}
-ecosphere %>% 
+emberizidae %>% 
   count(migratory_strategy)
 ```
 
 ```{r}
-ecosphere %>%
+emberizidae %>% 
   count(migratory_strategy) %>% 
   ggplot(aes(x=reorder(migratory_strategy, n), y=n))+
   geom_col()+
@@ -74,7 +69,7 @@ ecosphere %>%
 ```
 
 ```{r}
-ecosphere %>% 
+emberizidae %>% 
   filter(habitat != "NA") %>%
   ggplot(aes(x=urban_affiliate, y=winter_range_area, fill = migratory_strategy))+
   geom_boxplot()+
@@ -84,5 +79,17 @@ ecosphere %>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 ```
 
-
+```{r}
+emberizidae %>% 
+  ggplot(aes(x=migratory_strategy, y=winter_range_area, fill = habitat))+
+  geom_col(position = "dodge")+
+  scale_fill_brewer(palette = "PuBuGn")+
+  coord_flip()
+```
+```{r}
+emberizidae %>% 
+  ggplot(aes(x=urban_affiliate, fill = migratory_strategy))+
+  geom_bar(position = "dodge")+
+  scale_fill_brewer(palette = "PuBuGn")
+```
 

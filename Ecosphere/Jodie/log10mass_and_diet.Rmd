@@ -90,13 +90,13 @@ ecosphere %>%
   group_by(family) %>% 
   summarise(individuals_per_family = n()) %>% 
   arrange(desc(individuals_per_family)) %>%
-  top_n(10) %>%  # Filter top 10 most abundant families
+  top_n(5) %>%  # Filter top 10 most abundant families
   ggplot(aes(x = reorder(family, individuals_per_family), y = individuals_per_family, fill=family)) +
   geom_col(color = "black", alpha = 0.75) +
   scale_fill_brewer(palette = "PuBuGn") +
   theme() +
   labs(
-    title = "Number of Individuals per Family (Top 10)",
+    title = "Number of Individuals per Family (Top 5)",
     x = "Family",
     y = "Number of Individuals",
     fill = "Family"
@@ -189,6 +189,7 @@ ecosphere %>%
 ecosphere %>% 
   filter(family =="Emberizidae") %>% 
   filter(habitat!= "NA") %>% 
+  filter(habitat!= "Various") %>% 
   ggplot(aes(x=diet,y=log10_mass,fill=diet))+
   geom_boxplot(position="dodge", color="black", alpha=0.75)+
   scale_fill_brewer(palette ="PuBuGn")+

@@ -86,7 +86,7 @@ ecosphere %>%
   filter(family=="Emberizidae") %>% 
   ggplot(aes(x = common_name, y = mean_eggs_per_clutch , fill=mean_eggs_per_clutch)) +
   geom_col() +
-  scale_color_brewer(palette = "PuBuGn")+
+  scale_color_continuous(palette = "PuBuGn")+ #I changed "scale_color_brewer" to "scale_color_continuous" bc that's what CHATGPT said
   coord_flip()+
   labs(title = "Mean Eggs per Clutch in the Family Emberizidae ",
        x = "Common Name",

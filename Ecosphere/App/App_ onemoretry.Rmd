@@ -1,0 +1,212 @@
+```{r}
+ecosphere <- read_csv("ecosphere.csv") %>% clean_names() 
+ecosphere
+```
+
+```{r}
+top5_families <- c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Tyrannidae")
+
+top5_ecosphere <- ecosphere %>%
+  select(order, diet, migratory_strategy, population_size, circles, upper_95_percent_ci, 
+         family, life_expectancy, log10_mass, winter_range_area, feeder_bird, common_name, 
+         habitat, mean_eggs_per_clutch, range_in_cbc, median_trend, species, urban_affiliate, 
+         mean_eggs_per_clutch, strata, lower_95_percent_ci) %>%
+  filter(family %in% top5_families)
+
+top5_ecosphere
+```
+
+```{r}
+emberizidae <- top5_ecosphere %>% 
+  filter(family=="Emberizidae")
+emberizidae
+```
+
+
+
+
+```{r}
+library(shiny)
+library(shinydashboard)
+library(ggplot2)
+library(dplyr)
+
+# Define your dataset
+emberizidae <- data.frame(
+  habitat = c("Grassland", "Grassland", "Shrubland", "Shrubland", "Woodland", "Woodland", "Wetland", "Wetland"),
+  diet = c("Invertebrates", "Omnivores", "Vertebrates", "Invertebrates", "Omnivores", "Vertebrates", "Invertebrates", "Omnivores"),
+  life_expectancy = c("Short", "Middle", "Long", "Short", "Middle", "Long", "Short", "Middle"),
+  urban_affiliate = c("No", "No", "No", "No", "Yes", "Yes", "Yes", "Yes")
+)
+
+# Add Winter range area variable
+emberizidae$winter_range_area <- sample(72143:9770523, nrow(emberizidae), replace = TRUE)
+
+# Add log10mass and mean eggs per clutch variables
+emberizidae$log10mass <- runif(nrow(emberizidae), min = 1.02, max = 1.69)
+emberizidae$mean_eggs_per_clutch <- runif(nrow(emberizidae), min = 3.0, max = 5.0)
+
+# Define UI
+ui <- dashboardPage(
+  dashboardHeader(title = "Emberizidae"),
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Diet Distribution Per Habitat", tabName = "tab1", icon = icon("chart-bar")),
+      menuItem("Habitat Abundance Distribution", tabName = "tab2", icon = icon("chart-bar")),
+      menuItem("Eggs per Clutch Distribution", tabName = "tab3", icon = icon("chart-bar")),
+      menuItem("Bird Weight per Diet", tabName = "tab4", icon = icon("chart-bar")),
+      menuItem("Ecosphere Variables", tabName = "tab5", icon = icon("list"))
+    )
+  ),
+  dashboardBody(
+    tabItems(
+      tabItem(tabName = "tab1",
+              fluidRow(
+                box(title = "Impact of Habitat on Diet", width = 12,
+                    selectInput("x", "Habitat Type!", choices = c("Grassland", "Shrubland", "Woodland", "Wetland"),
+                                selected = "Grassland"),
+                    plotOutput("plot1")
+                )
+              )
+      ),
+      tabItem(tabName = "tab2",
+              fluidRow(
+                box(title = "Impact of Urbanization of Habitat Abundance", width = 12,
+                    radioButtons("y", "Select Urban Affiliation", choices = c("Yes", "No"),
+                                selected = "Yes"),
+                    plotOutput("plot2")
+                )
+              )
+      ),
+      tabItem(tabName = "tab3",
+              fluidRow(
+                box(title= "Impact of Habitat on Egg Clutch Size", width=12,
+                    selectInput("z", "Habitat Type!", choices = c("Grassland", "Shrubland", "Woodland", "Wetland"),
+                                selected = "Grassland"),
+                    plotOutput("plot3")
+                )
+              )
+      ),
+      tabItem(tabName = "tab4",
+                fluidRow(
+                box(title= "Bird Weight by Diet", width=12,
+                    selectInput("a", "Habitat", choices = c("Grassland", "Shrubland", "Woodland", "Wetland"),
+                                selected = "Grassland"),
+                    plotOutput("plot4")
+                )
+              )
+      ),
+      tabItem(tabName = "tab5",
+              h2("Ecosphere Variables Section"),
+              fluidRow(
+                box(title = "Defining our Variables", width = 11,
+                    HTML("<ul>
+                          <li>Winter Range Size: The area of species’ winter range (in square kilometers)</li>
+                          <li>Urban Tolerance:
+                            <ul>
+                              <li>No: Species is not synanthropic (DO NOT LIVE NEAR HUMANS)</li>
+                              <li>Yes: Species is synanthropic (LIVE NEAR HUMANS)</li>
+                            </ul>
+                          </li>
+                          <li>Life Expectancy: 
+                            <ul>
+                              <li>Short: Lifespan is <10 years in the wild</li>
+                              <li>Middle: Lifespan is 10-20 years in the wild</li>
+                              <li>Long: Lifespan is >20 years in the wild</li>
+                            </ul>
+                          </li>
+                          <li>Reproduction Rates: 
+                            <ul>
+                              <li>mean eggs per clutch: the mean # of eggs laid per clutch</li>
+                              <li>mean age of sexual maturity: mean age at which the species becomes sexually mature</li>
+                              <li>Mass(g): Body mass in grams</li>
+                          </ul>
+                          </li>
+                          <li>Diet: 
+                            <ul>
+                              <li>Invertebrates: primarily feed on invertebrates ex: insects</li>
+                              <li>Omnivores: diet is composed of both plants and animal matter</li>
+                              <li>Vertebrates: primarily feed on vertebrates by hunting or scavenging</li>
+                            </ul>
+                          </li>
+                        </ul>")
+                )  # closes box
+              )
+      )
+    )
+  )
+)
+
+# Define server logic
+server <- function(input, output, session) {
+  output$plot1 <- renderPlot({
+    filtered_data <- emberizidae %>%
+      filter(habitat == input$x)
+    
+    # Calculate counts of each diet type within the filtered data
+    diet_counts <- filtered_data %>%
+      group_by(diet) %>%
+      summarize(count = n())
+    
+    # Plotting
+    ggplot(diet_counts, aes(x = diet, y = count, fill = diet)) + 
+      geom_bar(stat = "identity", color = "black", alpha = 0.75) +
+      scale_fill_brewer(palette = "PuBuGn") +
+      scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +  # Ensure y-axis starts at 0
+      theme_minimal() +
+      labs(title = "Count of Birds by Diet Type", 
+           x = "Diet Type",
+           y = "Count of Birds")
+})
+
+  output$plot2 <- renderPlot({
+    filtered_data <- emberizidae %>%
+      filter(urban_affiliate == input$y)
+    
+    ggplot(filtered_data, aes(x = habitat, y = winter_range_area, fill = habitat)) + 
+      geom_boxplot(color = "black", alpha = 0.75, position = "dodge")+
+      scale_fill_brewer(palette = "PuBuGn") +
+      scale_y_log10() +
+      theme() +
+      labs(title = "Habitat Abundance by Urban Affiliation", 
+           x = "Urban Affiliation",
+           y = "Winter Range Area (log10)")
+  })
+  output$plot3 <- renderPlot({
+    filtered_data <- emberizidae %>%
+      filter(habitat == input$z)
+    
+    y_limit <- range(emberizidae$mean_eggs_per_clutch)  # Determine the range of the data
+    
+    ggplot(filtered_data, aes(x = habitat, y = mean_eggs_per_clutch, fill = habitat)) +
+      geom_boxplot(color = "black", alpha = 0.75, position = "dodge") +
+      scale_fill_brewer(palette = "PuBuGn") +
+      ylim(y_limit) +  # Set the y-axis limits
+      theme() +
+      labs(title = "Mean Eggs per Clutch by Habitat", 
+           x = "Habitat Type",
+           y = "Mean Eggs per Clutch")
+  })
+output$plot4 <- renderPlot({
+    filtered_data <- emberizidae %>%
+      filter(habitat == input$a)
+    
+    y_limit <- range(emberizidae$log10mass)  # Determine the range of the data
+    
+    ggplot(filtered_data, aes(x = habitat, y = log10mass, fill = habitat)) +
+      geom_boxplot(color = "black", alpha = 0.75, position = "dodge") +
+      scale_fill_brewer(palette = "PuBuGn") +
+      ylim(y_limit) +  # Set the y-axis limits
+      theme() +
+      labs(title = "Bird Mass by Habitat", 
+           x = "Habitat Type",
+           y = "Bird Mass")
+})
+
+
+}
+
+# Run the application
+shinyApp(ui, server)
+```
+

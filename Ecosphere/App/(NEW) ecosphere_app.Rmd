@@ -196,8 +196,6 @@ output$plot4 <- renderPlot({
            x = "Habitat Type",
            y = "Bird Mass")
 })
-
-
 }
 
 # Run the application

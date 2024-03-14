@@ -1,3 +1,12 @@
+## Load the Libraries
+```{r}
+library("tidyverse")
+library("janitor")
+library("naniar")
+library("RColorBrewer")
+```
+
+
 ```{r}
 ecosphere <- read_csv("ecosphere.csv") %>% clean_names() 
 ecosphere
@@ -9,7 +18,7 @@ top5_families <- c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Tyra
 top5_ecosphere <- ecosphere %>%
   select(order, diet, migratory_strategy, population_size, circles, upper_95_percent_ci, 
          family, life_expectancy, log10_mass, winter_range_area, feeder_bird, common_name, 
-         habitat, mean_eggs_per_clutch, range_in_cbc, median_trend, species, urban_affiliate, 
+         habitat, mean_eggs_per_clutch, range_in_cbc, median_trend, scientific_name, urban_affiliate, 
          mean_eggs_per_clutch, strata, lower_95_percent_ci) %>%
   filter(family %in% top5_families)
 
@@ -143,20 +152,22 @@ server <- function(input, output, session) {
     filtered_data <- emberizidae %>%
       filter(habitat == input$x)
     
-    # Calculate counts of each diet type within the filtered data
+    # Calculate counts of each diet type within each habitat category
     diet_counts <- filtered_data %>%
-      group_by(diet) %>%
-      summarize(count = n())
+      group_by(habitat) %>%
+      summarize(count = sum(diet))
     
     # Plotting
-    ggplot(diet_counts, aes(x = diet, y = count, fill = diet)) + 
+    ggplot(diet_counts, aes(x = diet, y = count, fill = diet)) +
       geom_bar(stat = "identity", color = "black", alpha = 0.75) +
       scale_fill_brewer(palette = "PuBuGn") +
-      scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +  # Ensure y-axis starts at 0
       theme_minimal() +
-      labs(title = "Count of Birds by Diet Type", 
-           x = "Diet Type",
-           y = "Count of Birds")
+      labs(
+        title = "Count of Observations for Each Diet Type by Habitat",
+        x = "Type of Diet",
+        y = "Number of Observations",
+        fill = "Diet"
+      )
 })
 
   output$plot2 <- renderPlot({

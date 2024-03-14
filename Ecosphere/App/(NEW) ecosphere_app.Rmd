@@ -7,11 +7,15 @@ library("RColorBrewer")
 library("scales")
 ```
 
-
+## Load the Data
 ```{r}
 ecosphere <- read_csv("ecosphere.csv") %>% clean_names() 
 ecosphere
 ```
+
+
+## Organizing the Data
+All graphs are made using a sub-category of data with information ONLY about the 5 top most abundant families in the data. This is done to make the number of observations on the x-axis more manageable.
 
 ```{r}
 top5_families <- c("Anatidae", "Emberizidae", "Parulidae", "Scolopacidae", "Tyrannidae")
@@ -32,8 +36,10 @@ emberizidae <- top5_ecosphere %>%
 emberizidae
 ```
 
+# About our App 
+In our app, users will be able to select a habitat location (Grassland, Shrubland, Woodland, Wetland) and learn more about the life history events in that specific location. The life history events available for users to learn about per species and habitat include: 
 
-
+Winter range size, urban tolerance, life expectancy, reproduction rates, mass(g), and diet. 
 
 ```{r}
 library(shiny)
@@ -229,3 +235,4 @@ output$plot4 <- renderPlot({
 shinyApp(ui, server)
 ```
 
+Thanks for stopping by, Keep your eyes on the sky for a song bird! - Group #6

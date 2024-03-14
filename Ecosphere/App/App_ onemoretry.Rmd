@@ -4,6 +4,7 @@ library("tidyverse")
 library("janitor")
 library("naniar")
 library("RColorBrewer")
+library("scales")
 ```
 
 
@@ -64,7 +65,7 @@ ui <- dashboardPage(
       menuItem("Habitat Abundance Distribution", tabName = "tab2", icon = icon("chart-bar")),
       menuItem("Eggs per Clutch Distribution", tabName = "tab3", icon = icon("chart-bar")),
       menuItem("Bird Weight per Diet", tabName = "tab4", icon = icon("chart-bar")),
-      menuItem("Ecosphere Variables", tabName = "tab5", icon = icon("list"))
+      menuItem("Ecosphere Variables", tabName = "tab5", icon = icon("question"))
     )
   ),
   dashboardBody(
@@ -170,19 +171,26 @@ server <- function(input, output, session) {
       )
 })
 
-  output$plot2 <- renderPlot({
+output$plot2 <- renderPlot({
     filtered_data <- emberizidae %>%
       filter(urban_affiliate == input$y)
     
-    ggplot(filtered_data, aes(x = habitat, y = winter_range_area, fill = habitat)) + 
-      geom_boxplot(color = "black", alpha = 0.75, position = "dodge")+
+    # Summarize the winter_range_area for each habitat
+    habitat_summary <- filtered_data %>%
+      group_by(habitat) %>%
+      summarize(total_winter_range_area = sum(winter_range_area))
+    
+    # Plotting
+    ggplot(habitat_summary, aes(x = habitat, y = total_winter_range_area, fill = habitat)) + 
+      geom_bar(stat = "identity", color = "black", alpha = 0.75) +
       scale_fill_brewer(palette = "PuBuGn") +
-      scale_y_log10() +
-      theme() +
-      labs(title = "Habitat Abundance by Urban Affiliation", 
-           x = "Urban Affiliation",
-           y = "Winter Range Area (log10)")
-  })
+      theme_minimal() +
+      labs(title = "Total Winter Range Area by Habitat and Urban Affiliation", 
+           x = "Habitat",
+           y = "Total Winter Range Area",
+           fill = "Habitat") +
+      scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
+})
   output$plot3 <- renderPlot({
     filtered_data <- emberizidae %>%
       filter(habitat == input$z)

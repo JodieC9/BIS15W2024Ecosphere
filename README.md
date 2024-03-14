@@ -8,9 +8,9 @@ Our project data is sourced from the article [Population Trends for North Americ
 
 ## Group Member Contributions per Variable Relationship
 
-- Log10mass+Diet relationship + ShinyApp: Jodie Cheun
-- Habitat+ Range size/migration+ Urban Tolerance: Jocelyn Morales
-- Life Expectancy+ Eggs: Pachia Lee
+- Log10mass + Diet Relationship + ShinyApp: Jodie Cheun
+- Habitat + Range Size/Migration + Urban Tolerance: Jocelyn Morales
+- Life Expectancy + Eggs Per Clutch: Pachia Lee
 
 ## Our Presentation! 
 [BIS15LW2024: Group 6 Ecosphere Presentation](https://docs.google.com/presentation/d/1BN9HsVjzjM23w02TPsVLT6UbEeYC65nxbEI6GZpzlvE/edit?usp=sharing)
